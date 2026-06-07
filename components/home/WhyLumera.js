@@ -1,3 +1,5 @@
+import SectionHeading from "@/components/ui/SectionHeading";
+
 const values = [
   {
     title: "Expert Therapists",
@@ -23,17 +25,13 @@ export default function WhyLumera() {
   return (
     <section className="bg-sand">
       <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-        <div className="max-w-2xl">
-          <h2 className="font-heading text-3xl font-semibold text-charcoal sm:text-4xl">
-            Why Lumera
-          </h2>
-          <p className="mt-4 text-muted">
-            More than a massage — a calm, considered experience from the moment
-            you arrive.
-          </p>
-        </div>
+        <SectionHeading label="Why Lumera" title="A considered experience" />
+        <p className="mx-auto -mt-6 mb-12 max-w-2xl text-center text-muted">
+          More than a massage — a calm, considered experience from the moment
+          you arrive.
+        </p>
 
-        <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           {values.map((value) => (
             <div
               key={value.title}

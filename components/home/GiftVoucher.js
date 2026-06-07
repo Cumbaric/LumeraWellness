@@ -1,17 +1,16 @@
 import Link from "next/link";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 export default function GiftVoucher() {
   return (
     <section className="bg-sand">
       <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+        <SectionHeading label="New Client Gift" title="A little welcome gift" />
         <div className="overflow-hidden rounded-2xl border-2 border-gold bg-cream shadow-md">
           <div className="grid grid-cols-1 gap-10 p-8 sm:p-12 lg:grid-cols-2 lg:items-center">
             {/* Left: offer copy */}
             <div>
-              <span className="text-sm font-medium uppercase tracking-[0.2em] text-gold">
-                New Client Gift
-              </span>
-              <h3 className="mt-4 font-heading text-3xl font-semibold text-charcoal sm:text-4xl">
+              <h3 className="font-heading text-3xl font-semibold text-charcoal sm:text-4xl">
                 €10 off your first treatment
               </h3>
               <p className="mt-4 text-muted">
