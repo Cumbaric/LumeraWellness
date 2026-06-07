@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -47,6 +48,14 @@ function CloseIcon() {
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  // A link is active on an exact match; non-home links also stay active on
+  // nested routes (e.g. "/services" is active on "/services/[slug]").
+  const isActive = (href) =>
+    href === "/"
+      ? pathname === "/"
+      : pathname === href || pathname.startsWith(`${href}/`);
 
   // Lock body scroll and close on Escape while the menu is open.
   useEffect(() => {
@@ -82,15 +91,23 @@ export default function Header() {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-8 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="text-sm text-muted transition-colors hover:text-charcoal"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.label}
+                href={link.href}
+                aria-current={active ? "page" : undefined}
+                className={`text-sm transition-colors ${
+                  active
+                    ? "font-medium text-gold"
+                    : "text-muted hover:text-charcoal"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Desktop CTA */}
@@ -124,16 +141,24 @@ export default function Header() {
           className="fixed inset-0 z-40 flex flex-col bg-sage-dark px-6 pb-10 pt-24 md:hidden"
         >
           <nav className="flex flex-col gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={close}
-                className="text-2xl font-medium text-cream transition-colors hover:text-gold"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  onClick={close}
+                  aria-current={active ? "page" : undefined}
+                  className={`text-2xl font-medium transition-colors ${
+                    active
+                      ? "border-l-2 border-gold pl-4 text-gold"
+                      : "text-cream hover:text-gold"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <Link
