@@ -37,7 +37,7 @@ export default function Header() {
 
         {/* CTA */}
         <Link
-          href="/contact"
+          href="/booking"
           className="rounded-full bg-sage px-5 py-2 text-sm font-medium text-cream transition-colors hover:bg-sage-dark"
         >
           Book Now

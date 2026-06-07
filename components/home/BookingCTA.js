@@ -12,7 +12,7 @@ export default function BookingCTA() {
           relax, recover, and rebalance.
         </p>
         <Link
-          href="/contact"
+          href="/booking"
           className="mt-10 rounded-full bg-cream px-8 py-3 text-base font-medium text-sage-dark transition-colors hover:bg-sand"
         >
           Book Your Visit
