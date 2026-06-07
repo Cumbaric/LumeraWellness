@@ -109,7 +109,7 @@ export default async function ServiceDetailPage({ params }) {
       {/* CTA + back link */}
       <div className="mt-16 flex flex-col items-start gap-6 border-t border-sand pt-10 sm:flex-row sm:items-center sm:justify-between">
         <Link
-          href="/booking"
+          href={`/booking?service=${service.slug}`}
           className="rounded-full bg-sage px-8 py-3 text-base font-medium text-cream transition-colors hover:bg-sage-dark"
         >
           Book this treatment
