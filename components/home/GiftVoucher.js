@@ -1,10 +1,12 @@
 import Link from "next/link";
 import SectionHeading from "@/components/ui/SectionHeading";
+import Section from "@/components/ui/Section";
+import Container from "@/components/ui/Container";
 
 export default function GiftVoucher() {
   return (
-    <section className="bg-sand">
-      <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+    <Section className="bg-sand">
+      <Container>
         <SectionHeading label="New Client Gift" title="A little welcome gift" />
         <div className="overflow-hidden rounded-2xl border-2 border-gold bg-cream shadow-md">
           <div className="grid grid-cols-1 gap-10 p-8 sm:p-12 lg:grid-cols-2 lg:items-center">
@@ -41,7 +43,7 @@ export default function GiftVoucher() {
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Container from "@/components/ui/Container";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -79,7 +80,7 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-sand bg-cream/80 backdrop-blur md:static">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <Container className="flex items-center justify-between py-4">
           {/* Logo */}
           <Link href="/" onClick={close} className="flex items-baseline gap-2">
             <span className="font-heading text-2xl font-semibold text-charcoal">
@@ -130,7 +131,7 @@ export default function Header() {
           >
             {isOpen ? <CloseIcon /> : <MenuIcon />}
           </button>
-        </div>
+        </Container>
       </header>
 
       {/* Mobile menu overlay — rendered OUTSIDE the header so its `fixed`
@@ -143,7 +144,7 @@ export default function Header() {
           role="dialog"
           aria-modal="true"
           aria-label="Main menu"
-          className="fixed inset-0 z-40 flex flex-col overscroll-contain bg-sage-dark px-6 pb-10 pt-24 md:hidden"
+          className="fixed inset-0 z-40 flex flex-col overscroll-contain bg-sage-dark px-4 pb-10 pt-24 sm:px-6 md:hidden"
         >
           <nav className="flex flex-col gap-6">
             {navLinks.map((link) => {

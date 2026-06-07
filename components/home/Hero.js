@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import Container from "@/components/ui/Container";
 
 export default function Hero() {
   return (
@@ -16,7 +17,7 @@ export default function Hero() {
       {/* Warm dark overlay for legibility */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-charcoal/70 via-charcoal/50 to-sage-dark/70" />
 
-      <div className="mx-auto flex max-w-4xl flex-col items-center px-6 py-24 text-center sm:py-32">
+      <Container className="flex flex-col items-center py-24 text-center sm:py-32">
         <span className="text-sm font-medium uppercase tracking-[0.35em] text-cream/90">
           Welcome to
         </span>
@@ -41,7 +42,7 @@ export default function Hero() {
             View Pricing
           </Link>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

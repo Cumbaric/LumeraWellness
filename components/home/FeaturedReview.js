@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import SectionHeading from "@/components/ui/SectionHeading";
+import Section from "@/components/ui/Section";
+import Container from "@/components/ui/Container";
 
 const reviews = [
   {
@@ -79,8 +81,8 @@ export default function FeaturedReview() {
   const initial = review.name.charAt(0);
 
   return (
-    <section className="bg-cream">
-      <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+    <Section className="bg-cream">
+      <Container>
         <SectionHeading label="Testimonials" title="What our guests say" />
 
         <div className="flex items-center justify-center gap-3 sm:gap-6">
@@ -144,7 +146,7 @@ export default function FeaturedReview() {
             />
           ))}
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

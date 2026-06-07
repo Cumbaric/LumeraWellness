@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Container from "@/components/ui/Container";
 
 const quickLinks = [
   { label: "Home", href: "/" },
@@ -104,7 +105,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-sage-dark text-cream">
-      <div className="mx-auto max-w-6xl px-6 py-16">
+      <Container className="py-16">
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Column 1 — Brand */}
           <div>
@@ -200,7 +201,7 @@ export default function Footer() {
           <p>&copy; {year} Lumera Wellness. All rights reserved.</p>
           <p className="text-cream/50">Crafted with care.</p>
         </div>
-      </div>
+      </Container>
     </footer>
   );
 }

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { services, categories } from "@/data/services";
 import { formatPrice, formatDuration } from "@/lib/format";
+import Section from "@/components/ui/Section";
+import Container from "@/components/ui/Container";
 
 function getService(slug) {
   return services.find((service) => service.slug === slug);
@@ -37,8 +39,9 @@ export default async function ServiceDetailPage({ params }) {
   const category = categories[service.category];
 
   return (
-    <article className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
-      {/* Hero: image + intro */}
+    <Section as="article">
+      <Container>
+        {/* Hero: image + intro */}
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
         <div className="relative aspect-[4/3] overflow-hidden rounded-3xl ring-1 ring-sand">
           <Image
@@ -121,6 +124,7 @@ export default async function ServiceDetailPage({ params }) {
           ← Back to all treatments
         </Link>
       </div>
-    </article>
+      </Container>
+    </Section>
   );
 }

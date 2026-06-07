@@ -1,5 +1,7 @@
 import SectionHeading from "@/components/ui/SectionHeading";
 import ContactForm from "@/components/contact/ContactForm";
+import Section from "@/components/ui/Section";
+import Container from "@/components/ui/Container";
 
 export const metadata = {
   title: "Contact | Lumera Wellness",
@@ -100,8 +102,8 @@ const socials = [
 
 export default function ContactPage() {
   return (
-    <div className="bg-cream">
-      <div className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+    <Section className="bg-cream">
+      <Container>
         {/* Header */}
         <div className="text-center">
           <SectionHeading label="Get in Touch" title="Contact Us" />
@@ -195,7 +197,7 @@ export default function ContactPage() {
             />
           </div>
         </div>
-      </div>
-    </div>
+      </Container>
+    </Section>
   );
 }

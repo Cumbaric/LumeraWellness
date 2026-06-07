@@ -1,5 +1,7 @@
 import Image from "next/image";
 import SectionHeading from "@/components/ui/SectionHeading";
+import Section from "@/components/ui/Section";
+import Container from "@/components/ui/Container";
 
 const values = [
   {
@@ -69,7 +71,7 @@ const values = [
 
 export default function WhyLumera() {
   return (
-    <section className="relative isolate overflow-hidden">
+    <Section className="relative isolate overflow-hidden">
       {/* Background image */}
       <Image
         src="https://images.unsplash.com/photo-1596178060671-7a80dc8059ea?auto=format&fit=crop&w=2000&q=80"
@@ -81,7 +83,7 @@ export default function WhyLumera() {
       {/* Dark warm overlay for legibility */}
       <div className="absolute inset-0 -z-10 bg-charcoal/70" />
 
-      <div className="mx-auto max-w-6xl px-6 py-24 sm:py-28">
+      <Container>
         <SectionHeading title="Why Lumera" light />
 
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-3">
@@ -99,7 +101,7 @@ export default function WhyLumera() {
             </div>
           ))}
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

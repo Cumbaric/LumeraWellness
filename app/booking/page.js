@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import BookingFlow from "@/components/booking/BookingFlow";
+import Section from "@/components/ui/Section";
+import Container from "@/components/ui/Container";
 
 export const metadata = {
   title: "Book a Treatment | Lumera Wellness",
@@ -10,16 +12,23 @@ export const metadata = {
 
 export default function BookingPage() {
   return (
-    <div className="bg-cream">
-      <div className="mx-auto max-w-3xl px-6 py-16 text-center sm:py-20">
-        <SectionHeading label="Booking" title="Book Your Treatment" />
-      </div>
+    <Section className="bg-cream">
+      <Container>
+        {/* The booking wizard stays centered at a focused, form-friendly width. */}
+        <div className="mx-auto max-w-3xl">
+          <div className="text-center">
+            <SectionHeading label="Booking" title="Book Your Treatment" />
+          </div>
 
-      <div className="mx-auto max-w-3xl px-6 pb-20 sm:pb-24">
-        <Suspense fallback={<div className="text-center text-muted">Loading…</div>}>
-          <BookingFlow />
-        </Suspense>
-      </div>
-    </div>
+          <div className="mt-4">
+            <Suspense
+              fallback={<div className="text-center text-muted">Loading…</div>}
+            >
+              <BookingFlow />
+            </Suspense>
+          </div>
+        </div>
+      </Container>
+    </Section>
   );
 }

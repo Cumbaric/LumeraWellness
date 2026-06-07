@@ -1,9 +1,11 @@
 import Link from "next/link";
+import Section from "@/components/ui/Section";
+import Container from "@/components/ui/Container";
 
 export default function BookingCTA() {
   return (
-    <section className="bg-sage-dark text-cream">
-      <div className="mx-auto flex max-w-6xl flex-col items-center px-6 py-20 text-center sm:py-24">
+    <Section className="bg-sage-dark text-cream">
+      <Container className="flex flex-col items-center text-center">
         <h2 className="font-heading text-3xl font-semibold sm:text-4xl">
           Ready to unwind?
         </h2>
@@ -17,7 +19,7 @@ export default function BookingCTA() {
         >
           Book Your Visit
         </Link>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import SectionHeading from "@/components/ui/SectionHeading";
+import Section from "@/components/ui/Section";
+import Container from "@/components/ui/Container";
 
 export const metadata = {
   title: "About | Lumera Wellness",
@@ -66,18 +68,24 @@ export default function AboutPage() {
   return (
     <div className="bg-cream">
       {/* 1. Intro */}
-      <section className="mx-auto max-w-3xl px-6 pt-16 text-center sm:pt-20">
-        <SectionHeading label="About Us" title="A calm escape in the city" />
-        <p className="-mt-6 text-lg leading-relaxed text-muted">
-          Lumera Wellness was created around a simple idea — that everyone
-          deserves a moment of true calm. We blend skilled massage therapy with a
-          serene environment to help you slow down, breathe, and feel restored.
-        </p>
-      </section>
+      <Section className="pb-0">
+        <Container>
+          <div className="mx-auto max-w-3xl text-center">
+            <SectionHeading label="About Us" title="A calm escape in the city" />
+            <p className="-mt-6 text-lg leading-relaxed text-muted">
+              Lumera Wellness was created around a simple idea — that everyone
+              deserves a moment of true calm. We blend skilled massage therapy
+              with a serene environment to help you slow down, breathe, and feel
+              restored.
+            </p>
+          </div>
+        </Container>
+      </Section>
 
       {/* 2. Our Story */}
-      <section className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
+      <Section>
+        <Container>
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
           <div>
             <h2 className="font-heading text-3xl font-semibold text-charcoal sm:text-4xl">
               Our Story
@@ -106,12 +114,13 @@ export default function AboutPage() {
               className="object-cover"
             />
           </div>
-        </div>
-      </section>
+          </div>
+        </Container>
+      </Section>
 
       {/* 3. Our Values */}
-      <section className="bg-sand">
-        <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+      <Section className="bg-sand">
+        <Container>
           <SectionHeading label="Our Values" title="What we stand for" />
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((value) => (
@@ -140,13 +149,14 @@ export default function AboutPage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </Container>
+      </Section>
 
       {/* 4. The Space */}
-      <section className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-        <SectionHeading label="The Space" title="Step inside Lumera" />
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <Section>
+        <Container>
+          <SectionHeading label="The Space" title="Step inside Lumera" />
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           {gallery.map((image) => (
             <div
               key={image.src}
@@ -161,12 +171,13 @@ export default function AboutPage() {
               />
             </div>
           ))}
-        </div>
-      </section>
+          </div>
+        </Container>
+      </Section>
 
       {/* 5. Closing CTA */}
-      <section className="bg-sage-dark text-cream">
-        <div className="mx-auto flex max-w-6xl flex-col items-center px-6 py-20 text-center sm:py-24">
+      <Section className="bg-sage-dark text-cream">
+        <Container className="flex flex-col items-center text-center">
           <h2 className="font-heading text-3xl font-semibold sm:text-4xl">
             Ready to unwind?
           </h2>
@@ -180,8 +191,8 @@ export default function AboutPage() {
           >
             Book Your Visit
           </Link>
-        </div>
-      </section>
+        </Container>
+      </Section>
     </div>
   );
 }
