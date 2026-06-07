@@ -1,5 +1,6 @@
 import { services, categories } from "@/data/services";
 import ServiceCard from "@/components/services/ServiceCard";
+import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
 
@@ -15,14 +16,14 @@ export default function ServicesPage() {
       {/* Page header */}
       <Section className="bg-sand">
         <Container>
-          <h1 className="font-heading text-4xl font-semibold text-charcoal sm:text-5xl">
-            Our Treatments
-          </h1>
-          <p className="mt-4 max-w-2xl text-muted">
-            A curated menu of massage and wellness rituals, each designed to help
-            you slow down, recover, and feel restored. Choose the experience
-            that fits your moment.
-          </p>
+          <div className="mx-auto max-w-2xl text-center">
+            <SectionHeading title="Our Treatments" />
+            <p className="-mt-6 text-muted">
+              A curated menu of massage and wellness rituals, each designed to
+              help you slow down, recover, and feel restored. Choose the
+              experience that fits your moment.
+            </p>
+          </div>
         </Container>
       </Section>
 

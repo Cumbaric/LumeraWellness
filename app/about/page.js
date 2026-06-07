@@ -68,7 +68,7 @@ export default function AboutPage() {
   return (
     <div className="bg-cream">
       {/* 1. Intro */}
-      <Section className="pb-0">
+      <Section className="bg-sand">
         <Container>
           <div className="mx-auto max-w-3xl text-center">
             <SectionHeading label="About Us" title="A calm escape in the city" />

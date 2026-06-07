@@ -13,19 +13,23 @@ export const metadata = {
 
 export default function PricingPage() {
   return (
-    <Section className="bg-cream">
-      <Container>
-        {/* Page header */}
-        <div className="mx-auto max-w-2xl text-center">
-          <SectionHeading label="Pricing" title="Treatments & Pricing" />
-          <p className="-mt-6 text-muted">
-            Transparent pricing for every treatment. Choose the duration that
-            suits you.
-          </p>
-        </div>
+    <>
+      {/* Hero / intro */}
+      <Section className="bg-sand">
+        <Container>
+          <div className="mx-auto max-w-2xl text-center">
+            <SectionHeading label="Pricing" title="Treatments & Pricing" />
+            <p className="-mt-6 text-muted">
+              Transparent pricing for every treatment. Choose the duration that
+              suits you.
+            </p>
+          </div>
+        </Container>
+      </Section>
 
-        {/* Pricing by category */}
-        <div className="mt-12">
+      {/* Pricing by category */}
+      <Section className="bg-cream">
+        <Container>
           {Object.entries(categories).map(([key, category]) => {
             const categoryServices = services.filter(
               (service) => service.category === key
@@ -96,8 +100,8 @@ export default function PricingPage() {
               Learn more
             </Link>
           </div>
-        </div>
-      </Container>
-    </Section>
+        </Container>
+      </Section>
+    </>
   );
 }

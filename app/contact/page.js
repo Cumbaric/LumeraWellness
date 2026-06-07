@@ -102,19 +102,25 @@ const socials = [
 
 export default function ContactPage() {
   return (
-    <Section className="bg-cream">
-      <Container>
-        {/* Header */}
-        <div className="text-center">
-          <SectionHeading label="Get in Touch" title="Contact Us" />
-          <p className="-mt-6 mx-auto max-w-xl text-muted">
-            Have a question or want to book a treatment? Send us a message and
-            we&apos;ll get back to you shortly.
-          </p>
-        </div>
+    <>
+      {/* Hero / intro */}
+      <Section className="bg-sand">
+        <Container>
+          <div className="text-center">
+            <SectionHeading label="Get in Touch" title="Contact Us" />
+            <p className="-mt-6 mx-auto max-w-xl text-muted">
+              Have a question or want to book a treatment? Send us a message and
+              we&apos;ll get back to you shortly.
+            </p>
+          </div>
+        </Container>
+      </Section>
 
-        {/* Two columns */}
-        <div className="mt-14 grid grid-cols-1 gap-10 lg:grid-cols-2">
+      {/* Contact details, form and map */}
+      <Section className="bg-cream">
+        <Container>
+          {/* Two columns */}
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
           {/* Left: contact info */}
           <div>
             <h2 className="font-heading text-2xl font-semibold text-charcoal">
@@ -199,5 +205,6 @@ export default function ContactPage() {
         </div>
       </Container>
     </Section>
+    </>
   );
 }
