@@ -7,14 +7,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        sage: "#7C9082",
-        "sage-dark": "#5F7265",
-        sand: "#F5F1EA",
-        cream: "#FBF8F3",
-        clay: "#B08968",
-        gold: "#C9A86A",
-        charcoal: "#2C2C2A",
-        muted: "#6B6B66",
+        sage: "#6A5A52",
+        "sage-dark": "#4F423B",
+        sand: "#EFE8DF",
+        cream: "#FBF7F1",
+        clay: "#A57E5E",
+        gold: "#C2A36B",
+        charcoal: "#332E2A",
+        muted: "#8A7E74",
       },
       fontFamily: {
         heading: ["var(--font-heading)", "serif"],
