@@ -100,13 +100,22 @@ export default function Header() {
                   key={link.label}
                   href={link.href}
                   aria-current={active ? "page" : undefined}
-                  className={`text-sm transition-colors ${
+                  className={`group relative pb-0.5 text-sm transition-colors ${
                     active
                       ? "font-medium text-gold"
                       : "text-muted hover:text-charcoal"
                   }`}
                 >
                   {link.label}
+                  {/* Animated underline: permanent for active, draws in on hover/focus for others */}
+                  <span
+                    aria-hidden="true"
+                    className={`absolute bottom-0 left-0 h-[2px] w-full origin-left bg-gold transition-transform duration-300 ease-out ${
+                      active
+                        ? "scale-x-100"
+                        : "scale-x-0 group-hover:scale-x-100 group-focus-visible:scale-x-100"
+                    }`}
+                  />
                 </Link>
               );
             })}
