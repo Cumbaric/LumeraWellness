@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { formatPrice, formatDuration } from "@/lib/format";
+import { createBooking } from "@/app/booking/actions";
 
 const STEPS = ["Service", "Date", "Time", "Details"];
 
@@ -89,6 +90,8 @@ function Stepper({ current }) {
 const fieldClasses =
   "mt-1.5 w-full rounded-xl border border-charcoal/15 bg-cream px-4 py-2.5 text-charcoal placeholder:text-muted/60 focus:border-sage focus:outline-none focus:ring-2 focus:ring-gold/50";
 
+const initialDetails = { name: "", email: "", phone: "", notes: "" };
+
 export default function BookingFlow({ services }) {
   const searchParams = useSearchParams();
   const presetSlug = searchParams.get("service");
@@ -101,14 +104,11 @@ export default function BookingFlow({ services }) {
   const [durationMinutes, setDurationMinutes] = useState(null);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [details, setDetails] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    notes: "",
-  });
+  const [details, setDetails] = useState(initialDetails);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   const selectedService = services.find((s) => s.slug === serviceSlug) || null;
   const selectedDuration =
@@ -145,11 +145,47 @@ export default function BookingFlow({ services }) {
     return Object.keys(next).length === 0;
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!validateDetails()) return;
-    // TODO: connect to Supabase / booking API.
-    // No network call yet — this is a demo. We only update local state.
-    setSubmitted(true);
+
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const result = await createBooking({
+        serviceId: selectedService.id,
+        serviceDurationId: selectedDuration.id,
+        date,
+        time,
+        name: details.name,
+        email: details.email,
+        phone: details.phone,
+        notes: details.notes,
+      });
+
+      if (result.ok) {
+        setSubmitted(true);
+      } else {
+        setSubmitError(result.error);
+      }
+    } catch (err) {
+      console.error("[BookingFlow] unexpected error:", err);
+      setSubmitError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleReset = () => {
+    setSubmitted(false);
+    setStep(1);
+    setServiceSlug("");
+    setDurationMinutes(null);
+    setDate("");
+    setTime("");
+    setDetails(initialDetails);
+    setErrors({});
+    setSubmitError(null);
   };
 
   const goBack = () => setStep((s) => Math.max(1, s - 1));
@@ -165,6 +201,9 @@ export default function BookingFlow({ services }) {
         <h2 className="mt-6 font-heading text-3xl font-semibold text-charcoal">
           Booking Request Received
         </h2>
+        <p className="mt-2 text-sm text-muted">
+          We&apos;ll be in touch to confirm your appointment.
+        </p>
 
         <div className="mx-auto mt-8 max-w-md rounded-xl bg-cream p-6 text-left ring-1 ring-charcoal/10">
           <dl className="space-y-3 text-sm">
@@ -189,9 +228,13 @@ export default function BookingFlow({ services }) {
           </dl>
         </div>
 
-        <p className="mt-6 text-sm text-muted">
-          This is a demo — bookings are not stored yet.
-        </p>
+        <button
+          type="button"
+          onClick={handleReset}
+          className="mt-8 text-sm font-medium text-sage transition-colors hover:text-sage-dark"
+        >
+          Make another booking
+        </button>
       </div>
     );
   }
@@ -419,7 +462,7 @@ export default function BookingFlow({ services }) {
           <button
             type="button"
             onClick={goBack}
-            disabled={step === 1}
+            disabled={step === 1 || submitting}
             className="rounded-full px-6 py-2.5 text-sm font-medium text-charcoal transition-colors enabled:hover:bg-cream disabled:cursor-not-allowed disabled:opacity-40"
           >
             Back
@@ -438,12 +481,24 @@ export default function BookingFlow({ services }) {
             <button
               type="button"
               onClick={handleConfirm}
-              className="rounded-full bg-sage px-8 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-sage-dark"
+              disabled={submitting}
+              className="rounded-full bg-sage px-8 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-sage-dark disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Confirm Booking
+              {submitting ? "Saving…" : "Confirm Booking"}
             </button>
           )}
         </div>
+
+        {/* Submission error — only shown after a failed confirm attempt */}
+        {submitError && (
+          <p
+            role="alert"
+            aria-live="assertive"
+            className="mt-4 text-center text-sm text-clay"
+          >
+            {submitError}
+          </p>
+        )}
       </div>
     </div>
   );
