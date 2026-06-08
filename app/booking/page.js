@@ -3,6 +3,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import BookingFlow from "@/components/booking/BookingFlow";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
+import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata = {
   title: "Book a Treatment | Lumera Wellness",
@@ -16,17 +17,17 @@ export default function BookingPage() {
       <Container>
         {/* The booking wizard stays centered at a focused, form-friendly width. */}
         <div className="mx-auto max-w-3xl">
-          <div className="text-center">
+          <Reveal className="text-center">
             <SectionHeading label="Booking" title="Book Your Treatment" />
-          </div>
+          </Reveal>
 
-          <div className="mt-4">
+          <Reveal className="mt-4">
             <Suspense
               fallback={<div className="text-center text-muted">Loading…</div>}
             >
               <BookingFlow />
             </Suspense>
-          </div>
+          </Reveal>
         </div>
       </Container>
     </Section>

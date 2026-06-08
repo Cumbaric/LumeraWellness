@@ -2,6 +2,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import ContactForm from "@/components/contact/ContactForm";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
+import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata = {
   title: "Contact | Lumera Wellness",
@@ -106,13 +107,13 @@ export default function ContactPage() {
       {/* Hero / intro */}
       <Section className="bg-sand">
         <Container>
-          <div className="text-center">
+          <Reveal className="text-center">
             <SectionHeading label="Get in Touch" title="Contact Us" />
             <p className="-mt-6 mx-auto max-w-xl text-muted">
               Have a question or want to book a treatment? Send us a message and
               we&apos;ll get back to you shortly.
             </p>
-          </div>
+          </Reveal>
         </Container>
       </Section>
 
@@ -122,7 +123,7 @@ export default function ContactPage() {
           {/* Two columns */}
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
           {/* Left: contact info */}
-          <div>
+          <Reveal>
             <h2 className="font-heading text-2xl font-semibold text-charcoal">
               Visit or reach us
             </h2>
@@ -185,14 +186,16 @@ export default function ContactPage() {
                 ))}
               </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Right: form */}
-          <ContactForm />
+          <Reveal>
+            <ContactForm />
+          </Reveal>
         </div>
 
         {/* Map */}
-        <div className="mt-14">
+        <Reveal className="mt-14">
           <div className="overflow-hidden rounded-2xl ring-1 ring-charcoal/10">
             <iframe
               title="Lumera Wellness location on Google Maps"
@@ -202,7 +205,7 @@ export default function ContactPage() {
               className="aspect-[16/9] w-full border-0"
             />
           </div>
-        </div>
+        </Reveal>
       </Container>
     </Section>
     </>

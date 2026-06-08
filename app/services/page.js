@@ -3,6 +3,7 @@ import ServiceCard from "@/components/services/ServiceCard";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
+import { Reveal, RevealItem } from "@/components/ui/Reveal";
 
 export const metadata = {
   title: "Treatments | Lumera Wellness",
@@ -16,14 +17,14 @@ export default function ServicesPage() {
       {/* Page header */}
       <Section className="bg-sand">
         <Container>
-          <div className="mx-auto max-w-2xl text-center">
+          <Reveal className="mx-auto max-w-2xl text-center">
             <SectionHeading title="Our Treatments" />
             <p className="-mt-6 text-muted">
               A curated menu of massage and wellness rituals, each designed to
               help you slow down, recover, and feel restored. Choose the
               experience that fits your moment.
             </p>
-          </div>
+          </Reveal>
         </Container>
       </Section>
 
@@ -39,19 +40,24 @@ export default function ServicesPage() {
 
             return (
               <section key={key} className="mb-16 last:mb-0">
-                <h2 className="text-center font-heading text-2xl font-semibold text-charcoal sm:text-3xl">
-                  {category.label}
-                </h2>
-                <div className="mt-8 flex flex-wrap justify-center gap-6">
+                <Reveal>
+                  <h2 className="text-center font-heading text-2xl font-semibold text-charcoal sm:text-3xl">
+                    {category.label}
+                  </h2>
+                </Reveal>
+                <Reveal
+                  stagger
+                  className="mt-8 flex flex-wrap justify-center gap-6"
+                >
                   {categoryServices.map((service) => (
-                    <div
+                    <RevealItem
                       key={service.id}
                       className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
                     >
                       <ServiceCard service={service} />
-                    </div>
+                    </RevealItem>
                   ))}
-                </div>
+                </Reveal>
               </section>
             );
           })}

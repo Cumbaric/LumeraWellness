@@ -4,6 +4,7 @@ import { formatPrice, formatDuration } from "@/lib/format";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
+import { Reveal, RevealItem } from "@/components/ui/Reveal";
 
 export const metadata = {
   title: "Pricing | Lumera Wellness",
@@ -17,13 +18,13 @@ export default function PricingPage() {
       {/* Hero / intro */}
       <Section className="bg-sand">
         <Container>
-          <div className="mx-auto max-w-2xl text-center">
+          <Reveal className="mx-auto max-w-2xl text-center">
             <SectionHeading label="Pricing" title="Treatments & Pricing" />
             <p className="-mt-6 text-muted">
               Transparent pricing for every treatment. Choose the duration that
               suits you.
             </p>
-          </div>
+          </Reveal>
         </Container>
       </Section>
 
@@ -39,13 +40,18 @@ export default function PricingPage() {
 
             return (
               <section key={key} className="mb-16 last:mb-0">
-                <h2 className="font-heading text-2xl font-semibold text-charcoal sm:text-3xl">
-                  {category.label}
-                </h2>
+                <Reveal>
+                  <h2 className="font-heading text-2xl font-semibold text-charcoal sm:text-3xl">
+                    {category.label}
+                  </h2>
+                </Reveal>
 
-                <div className="mt-6 divide-y divide-charcoal/10 rounded-2xl bg-cream ring-1 ring-charcoal/10">
+                <Reveal
+                  stagger
+                  className="mt-6 divide-y divide-charcoal/10 rounded-2xl bg-cream ring-1 ring-charcoal/10"
+                >
                   {categoryServices.map((service) => (
-                    <div
+                    <RevealItem
                       key={service.id}
                       className="flex flex-col gap-3 p-6 sm:flex-row sm:items-start sm:justify-between sm:gap-8"
                     >
@@ -76,15 +82,15 @@ export default function PricingPage() {
                           </li>
                         ))}
                       </ul>
-                    </div>
+                    </RevealItem>
                   ))}
-                </div>
+                </Reveal>
               </section>
             );
           })}
 
           {/* Gift voucher note */}
-          <div className="mt-8 flex flex-col items-center gap-4 rounded-2xl border border-gold/40 bg-sand p-8 text-center sm:flex-row sm:justify-between sm:text-left">
+          <Reveal className="mt-8 flex flex-col items-center gap-4 rounded-2xl border border-gold/40 bg-sand p-8 text-center sm:flex-row sm:justify-between sm:text-left">
             <div>
               <h2 className="font-heading text-xl font-semibold text-charcoal">
                 Looking for a gift?
@@ -99,7 +105,7 @@ export default function PricingPage() {
             >
               Learn more
             </Link>
-          </div>
+          </Reveal>
         </Container>
       </Section>
     </>

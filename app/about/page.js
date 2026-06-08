@@ -3,6 +3,7 @@ import Link from "next/link";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
+import { Reveal, RevealItem } from "@/components/ui/Reveal";
 
 export const metadata = {
   title: "About | Lumera Wellness",
@@ -70,7 +71,7 @@ export default function AboutPage() {
       {/* 1. Intro */}
       <Section className="bg-sand">
         <Container>
-          <div className="mx-auto max-w-3xl text-center">
+          <Reveal className="mx-auto max-w-3xl text-center">
             <SectionHeading label="About Us" title="A calm escape in the city" />
             <p className="-mt-6 text-lg leading-relaxed text-muted">
               Lumera Wellness was created around a simple idea — that everyone
@@ -78,14 +79,14 @@ export default function AboutPage() {
               with a serene environment to help you slow down, breathe, and feel
               restored.
             </p>
-          </div>
+          </Reveal>
         </Container>
       </Section>
 
       {/* 2. Our Story */}
       <Section>
         <Container>
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
+          <Reveal className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
           <div>
             <h2 className="font-heading text-3xl font-semibold text-charcoal sm:text-4xl">
               Our Story
@@ -114,17 +115,22 @@ export default function AboutPage() {
               className="object-cover"
             />
           </div>
-          </div>
+          </Reveal>
         </Container>
       </Section>
 
       {/* 3. Our Values */}
       <Section className="bg-sand">
         <Container>
-          <SectionHeading label="Our Values" title="What we stand for" />
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Reveal>
+            <SectionHeading label="Our Values" title="What we stand for" />
+          </Reveal>
+          <Reveal
+            stagger
+            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+          >
             {values.map((value) => (
-              <div
+              <RevealItem
                 key={value.title}
                 className="rounded-2xl bg-cream p-8 ring-1 ring-charcoal/10"
               >
@@ -146,19 +152,21 @@ export default function AboutPage() {
                 <p className="mt-2 text-sm leading-relaxed text-muted">
                   {value.description}
                 </p>
-              </div>
+              </RevealItem>
             ))}
-          </div>
+          </Reveal>
         </Container>
       </Section>
 
       {/* 4. The Space */}
       <Section>
         <Container>
-          <SectionHeading label="The Space" title="Step inside Lumera" />
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <Reveal>
+            <SectionHeading label="The Space" title="Step inside Lumera" />
+          </Reveal>
+          <Reveal stagger className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           {gallery.map((image) => (
-            <div
+            <RevealItem
               key={image.src}
               className="group relative aspect-[3/4] overflow-hidden rounded-2xl ring-1 ring-charcoal/10"
             >
@@ -169,15 +177,16 @@ export default function AboutPage() {
                 sizes="(min-width: 640px) 33vw, 100vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
-            </div>
+            </RevealItem>
           ))}
-          </div>
+          </Reveal>
         </Container>
       </Section>
 
       {/* 5. Closing CTA */}
       <Section className="bg-sage-dark text-cream">
         <Container className="flex flex-col items-center text-center">
+          <Reveal className="flex w-full flex-col items-center">
           <h2 className="font-heading text-3xl font-semibold sm:text-4xl">
             Ready to unwind?
           </h2>
@@ -191,6 +200,7 @@ export default function AboutPage() {
           >
             Book Your Visit
           </Link>
+          </Reveal>
         </Container>
       </Section>
     </div>
