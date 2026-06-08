@@ -7,9 +7,21 @@ import Container from "@/components/ui/Container";
 import { Reveal, RevealItem } from "@/components/ui/Reveal";
 
 export const metadata = {
-  title: "Pricing | Lumera Wellness",
+  title: "Treatments & Pricing",
   description:
-    "Transparent pricing for every Lumera treatment. Browse our massage and wellness rituals by category and choose the duration that suits you.",
+    "Transparent pricing for every massage and wellness treatment at Lumera Wellness. Choose the duration that suits you.",
+  openGraph: {
+    title: "Treatments & Pricing | Lumera Wellness",
+    description:
+      "Transparent pricing for every massage and wellness treatment at Lumera Wellness. Choose the duration that suits you.",
+    url: "https://lumerawellness.vercel.app/pricing",
+  },
+  twitter: {
+    title: "Treatments & Pricing | Lumera Wellness",
+    description:
+      "Transparent pricing for every massage and wellness treatment at Lumera Wellness. Choose the duration that suits you.",
+  },
+  alternates: { canonical: "/pricing" },
 };
 
 export default function PricingPage() {

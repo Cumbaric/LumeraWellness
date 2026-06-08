@@ -1,3 +1,22 @@
+export const metadata = {
+  // Absolute title prevents the root template from duplicating the brand name
+  title: { absolute: "Lumera Wellness | Premium Massage & Wellness Studio" },
+  description:
+    "Relax, recover, and rebalance at Lumera Wellness. Premium massage and wellness treatments in a calm, welcoming space. Book online today.",
+  openGraph: {
+    title: "Lumera Wellness | Premium Massage & Wellness Studio",
+    description:
+      "Relax, recover, and rebalance at Lumera Wellness. Premium massage and wellness treatments in a calm, welcoming space. Book online today.",
+    url: "https://lumerawellness.vercel.app",
+  },
+  twitter: {
+    title: "Lumera Wellness | Premium Massage & Wellness Studio",
+    description:
+      "Relax, recover, and rebalance at Lumera Wellness. Premium massage and wellness treatments in a calm, welcoming space. Book online today.",
+  },
+  alternates: { canonical: "/" },
+};
+
 import Hero from "@/components/home/Hero";
 import WelcomeIntro from "@/components/home/WelcomeIntro";
 import FeaturedServices from "@/components/home/FeaturedServices";

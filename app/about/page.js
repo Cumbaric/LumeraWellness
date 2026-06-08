@@ -6,9 +6,21 @@ import Container from "@/components/ui/Container";
 import { Reveal, RevealItem } from "@/components/ui/Reveal";
 
 export const metadata = {
-  title: "About | Lumera Wellness",
+  title: "About Us",
   description:
-    "Discover the philosophy and people behind Lumera Wellness — a calm, premium massage studio built around personalized care and genuine relaxation.",
+    "Learn about Lumera Wellness — our story, our values, and the calm, personalized care behind every treatment.",
+  openGraph: {
+    title: "About Us | Lumera Wellness",
+    description:
+      "Learn about Lumera Wellness — our story, our values, and the calm, personalized care behind every treatment.",
+    url: "https://lumerawellness.vercel.app/about",
+  },
+  twitter: {
+    title: "About Us | Lumera Wellness",
+    description:
+      "Learn about Lumera Wellness — our story, our values, and the calm, personalized care behind every treatment.",
+  },
+  alternates: { canonical: "/about" },
 };
 
 const IMG = "auto=format&fit=crop&q=80";

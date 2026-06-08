@@ -5,9 +5,21 @@ import Container from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata = {
-  title: "Contact | Lumera Wellness",
+  title: "Contact Us",
   description:
-    "Get in touch with Lumera Wellness — find our address, opening hours, and send us a message to book your next treatment.",
+    "Get in touch with Lumera Wellness. Find our location, opening hours, and send us a message to book your treatment.",
+  openGraph: {
+    title: "Contact Us | Lumera Wellness",
+    description:
+      "Get in touch with Lumera Wellness. Find our location, opening hours, and send us a message to book your treatment.",
+    url: "https://lumerawellness.vercel.app/contact",
+  },
+  twitter: {
+    title: "Contact Us | Lumera Wellness",
+    description:
+      "Get in touch with Lumera Wellness. Find our location, opening hours, and send us a message to book your treatment.",
+  },
+  alternates: { canonical: "/contact" },
 };
 
 const hours = [

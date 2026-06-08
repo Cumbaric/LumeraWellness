@@ -20,12 +20,23 @@ export async function generateMetadata({ params }) {
   const service = getService(slug);
 
   if (!service) {
-    return { title: "Treatment not found | Lumera Wellness" };
+    return { title: "Treatment not found" };
   }
 
   return {
-    title: `${service.name} | Lumera Wellness`,
+    title: service.name,
     description: service.shortDescription,
+    openGraph: {
+      title: `${service.name} | Lumera Wellness`,
+      description: service.shortDescription,
+      url: `https://lumerawellness.vercel.app/services/${service.slug}`,
+      images: [{ url: service.image, width: 1200, height: 900, alt: service.name }],
+    },
+    twitter: {
+      title: `${service.name} | Lumera Wellness`,
+      description: service.shortDescription,
+    },
+    alternates: { canonical: `/services/${service.slug}` },
   };
 }
 

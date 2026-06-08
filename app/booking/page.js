@@ -6,9 +6,21 @@ import Container from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata = {
-  title: "Book a Treatment | Lumera Wellness",
+  title: "Book a Treatment",
   description:
-    "Book your massage or wellness treatment at Lumera in a few simple steps — choose a treatment, date, and time that suit you.",
+    "Book your massage or wellness treatment at Lumera Wellness in a few simple steps. Choose your treatment, date, and time online.",
+  openGraph: {
+    title: "Book a Treatment | Lumera Wellness",
+    description:
+      "Book your massage or wellness treatment at Lumera Wellness in a few simple steps. Choose your treatment, date, and time online.",
+    url: "https://lumerawellness.vercel.app/booking",
+  },
+  twitter: {
+    title: "Book a Treatment | Lumera Wellness",
+    description:
+      "Book your massage or wellness treatment at Lumera Wellness in a few simple steps. Choose your treatment, date, and time online.",
+  },
+  alternates: { canonical: "/booking" },
 };
 
 export default function BookingPage() {

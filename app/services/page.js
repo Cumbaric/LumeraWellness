@@ -6,9 +6,21 @@ import Container from "@/components/ui/Container";
 import { Reveal, RevealItem } from "@/components/ui/Reveal";
 
 export const metadata = {
-  title: "Treatments | Lumera Wellness",
+  title: "Massage & Wellness Treatments",
   description:
-    "Explore our full range of massage and wellness treatments — from relaxing aromatherapy to deep tissue therapy, hot stone rituals, and couples experiences.",
+    "Explore our full menu of massage and wellness treatments — relaxation, therapeutic, body, and couples rituals tailored to your needs.",
+  openGraph: {
+    title: "Massage & Wellness Treatments | Lumera Wellness",
+    description:
+      "Explore our full menu of massage and wellness treatments — relaxation, therapeutic, body, and couples rituals tailored to your needs.",
+    url: "https://lumerawellness.vercel.app/services",
+  },
+  twitter: {
+    title: "Massage & Wellness Treatments | Lumera Wellness",
+    description:
+      "Explore our full menu of massage and wellness treatments — relaxation, therapeutic, body, and couples rituals tailored to your needs.",
+  },
+  alternates: { canonical: "/services" },
 };
 
 export default function ServicesPage() {

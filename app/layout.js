@@ -16,9 +16,34 @@ const inter = Inter({
   display: "swap",
 });
 
+// TODO: replace metadataBase with the real Vercel production URL once deployed
+const siteUrl = "https://lumerawellness.vercel.app";
+const defaultTitle = "Lumera Wellness | Premium Massage & Wellness Studio";
+const defaultDescription =
+  "Lumera Wellness is a premium massage and wellness studio offering relaxing, therapeutic, and body treatments in a serene setting. Book your escape today.";
+
 export const metadata = {
-  title: "Lumera Wellness",
-  description: "A premium massage & wellness studio.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: defaultTitle,
+    template: "%s | Lumera Wellness",
+  },
+  description: defaultDescription,
+  openGraph: {
+    type: "website",
+    siteName: "Lumera Wellness",
+    title: defaultTitle,
+    description: defaultDescription,
+    url: siteUrl,
+    // TODO: add /public/og-image.jpg (1200x630) for richer link previews
+    // images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: defaultDescription,
+  },
+  alternates: { canonical: "/" },
 };
 
 export default function RootLayout({ children }) {
