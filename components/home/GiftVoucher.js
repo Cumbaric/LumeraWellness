@@ -2,13 +2,15 @@ import Link from "next/link";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
+import { Reveal } from "@/components/ui/Reveal";
 
 export default function GiftVoucher() {
   return (
     <Section className="bg-sand">
       <Container>
-        <SectionHeading label="New Client Gift" title="A little welcome gift" />
-        <div className="overflow-hidden rounded-2xl border-2 border-gold bg-cream shadow-md">
+        <Reveal>
+          <SectionHeading label="New Client Gift" title="A little welcome gift" />
+          <div className="overflow-hidden rounded-2xl border-2 border-gold bg-cream shadow-md">
           <div className="grid grid-cols-1 gap-10 p-8 sm:p-12 lg:grid-cols-2 lg:items-center">
             {/* Left: offer copy */}
             <div>
@@ -43,6 +45,7 @@ export default function GiftVoucher() {
             </div>
           </div>
         </div>
+        </Reveal>
       </Container>
     </Section>
   );

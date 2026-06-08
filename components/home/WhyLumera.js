@@ -2,6 +2,7 @@ import Image from "next/image";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
+import { Reveal } from "@/components/ui/Reveal";
 
 const values = [
   {
@@ -84,23 +85,25 @@ export default function WhyLumera() {
       <div className="absolute inset-0 -z-10 bg-charcoal/70" />
 
       <Container>
-        <SectionHeading title="Why Lumera" light />
+        <Reveal>
+          <SectionHeading title="Why Lumera" light />
 
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-3">
-          {values.map((value) => (
-            <div key={value.title} className="text-center text-cream">
-              <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-gold/50 text-gold">
-                {value.icon}
-              </span>
-              <h3 className="mt-6 font-heading text-xl font-semibold text-cream">
-                {value.title}
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-cream/80">
-                {value.description}
-              </p>
-            </div>
-          ))}
-        </div>
+          <div className="grid grid-cols-1 gap-12 sm:grid-cols-3">
+            {values.map((value) => (
+              <div key={value.title} className="text-center text-cream">
+                <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-gold/50 text-gold">
+                  {value.icon}
+                </span>
+                <h3 className="mt-6 font-heading text-xl font-semibold text-cream">
+                  {value.title}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-cream/80">
+                  {value.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Reveal>
       </Container>
     </Section>
   );

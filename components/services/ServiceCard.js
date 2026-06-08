@@ -11,14 +11,14 @@ export default function ServiceCard({ service }) {
   const startingPrice = getStartingPrice(service);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-cream text-center shadow-sm ring-1 ring-sand transition-shadow hover:shadow-md">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-cream text-center shadow-sm ring-1 ring-sand transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
       <div className="relative aspect-[4/3] overflow-hidden">
         <Image
           src={service.image}
           alt={service.name}
           fill
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
       </div>
 

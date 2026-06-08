@@ -4,6 +4,7 @@ import { useState } from "react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
+import { Reveal } from "@/components/ui/Reveal";
 
 const reviews = [
   {
@@ -83,6 +84,7 @@ export default function FeaturedReview() {
   return (
     <Section className="bg-cream">
       <Container>
+        <Reveal>
         <SectionHeading label="Testimonials" title="What our guests say" />
 
         <div className="flex items-center justify-center gap-3 sm:gap-6">
@@ -146,6 +148,7 @@ export default function FeaturedReview() {
             />
           ))}
         </div>
+        </Reveal>
       </Container>
     </Section>
   );
