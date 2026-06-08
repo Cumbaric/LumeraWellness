@@ -124,7 +124,7 @@ export const services = [
     ],
     durations: [{ minutes: 90, price: 70 }],
     image: `https://images.unsplash.com/photo-1610402601271-5b4bd5b3eba4?${IMG}`,
-    featured: true,
+    featured: false,
   },
   {
     id: "body-scrub",
