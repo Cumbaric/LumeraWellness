@@ -1,23 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { services, categories } from "@/data/services";
+import { getServiceBySlug, getServiceSlugs, getCategories } from "@/lib/services";
 import { formatPrice, formatDuration } from "@/lib/format";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
 import { Reveal, RevealItem } from "@/components/ui/Reveal";
 
-function getService(slug) {
-  return services.find((service) => service.slug === slug);
-}
-
-export function generateStaticParams() {
-  return services.map((service) => ({ slug: service.slug }));
+export async function generateStaticParams() {
+  const slugs = await getServiceSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const service = getService(slug);
+  const service = await getServiceBySlug(slug);
 
   if (!service) {
     return { title: "Treatment not found" };
@@ -42,7 +39,10 @@ export async function generateMetadata({ params }) {
 
 export default async function ServiceDetailPage({ params }) {
   const { slug } = await params;
-  const service = getService(slug);
+  const [service, categories] = await Promise.all([
+    getServiceBySlug(slug),
+    getCategories(),
+  ]);
 
   if (!service) {
     notFound();

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { services, categories } from "@/data/services";
+import { getServices, getCategories } from "@/lib/services";
 import { formatPrice, formatDuration } from "@/lib/format";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
@@ -24,7 +24,12 @@ export const metadata = {
   alternates: { canonical: "/pricing" },
 };
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const [services, categories] = await Promise.all([
+    getServices(),
+    getCategories(),
+  ]);
+
   return (
     <>
       {/* Hero / intro */}

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { services } from "@/data/services";
 import { formatPrice, formatDuration } from "@/lib/format";
 
 const STEPS = ["Service", "Date", "Time", "Details"];
@@ -90,7 +89,7 @@ function Stepper({ current }) {
 const fieldClasses =
   "mt-1.5 w-full rounded-xl border border-charcoal/15 bg-cream px-4 py-2.5 text-charcoal placeholder:text-muted/60 focus:border-sage focus:outline-none focus:ring-2 focus:ring-gold/50";
 
-export default function BookingFlow() {
+export default function BookingFlow({ services }) {
   const searchParams = useSearchParams();
   const presetSlug = searchParams.get("service");
   const validPreset = services.some((s) => s.slug === presetSlug)

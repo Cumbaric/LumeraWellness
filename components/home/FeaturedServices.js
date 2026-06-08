@@ -1,13 +1,12 @@
 import Link from "next/link";
-import { services } from "@/data/services";
 import ServiceCard from "@/components/services/ServiceCard";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
 import { Reveal, RevealItem } from "@/components/ui/Reveal";
 
-export default function FeaturedServices() {
-  const featured = services.filter((service) => service.featured);
+export default function FeaturedServices({ services }) {
+  const featured = services;
 
   return (
     <Section>

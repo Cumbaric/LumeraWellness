@@ -1,4 +1,4 @@
-import { services, categories } from "@/data/services";
+import { getServices, getCategories } from "@/lib/services";
 import ServiceCard from "@/components/services/ServiceCard";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
@@ -23,7 +23,12 @@ export const metadata = {
   alternates: { canonical: "/services" },
 };
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const [services, categories] = await Promise.all([
+    getServices(),
+    getCategories(),
+  ]);
+
   return (
     <div>
       {/* Page header */}

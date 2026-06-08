@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { formatPrice } from "@/lib/format";
-import { getStartingPrice } from "@/data/services";
+import { formatPrice, getStartingPrice } from "@/lib/format";
 
 /**
  * Presentational card for a single service. Reused on the Home page and,
@@ -11,7 +10,7 @@ export default function ServiceCard({ service }) {
   const startingPrice = getStartingPrice(service);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-cream text-center shadow-sm ring-1 ring-sand transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-cream text-center shadow-sm ring-1 ring-sand transition-all duration-300 hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden">
         <Image
           src={service.image}

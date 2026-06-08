@@ -1,3 +1,12 @@
+import Hero from "@/components/home/Hero";
+import WelcomeIntro from "@/components/home/WelcomeIntro";
+import FeaturedServices from "@/components/home/FeaturedServices";
+import GiftVoucher from "@/components/home/GiftVoucher";
+import WhyLumera from "@/components/home/WhyLumera";
+import FeaturedReview from "@/components/home/FeaturedReview";
+import BookingCTA from "@/components/home/BookingCTA";
+import { getFeaturedServices } from "@/lib/services";
+
 export const metadata = {
   // Absolute title prevents the root template from duplicating the brand name
   title: { absolute: "Lumera Wellness | Premium Massage & Wellness Studio" },
@@ -17,20 +26,14 @@ export const metadata = {
   alternates: { canonical: "/" },
 };
 
-import Hero from "@/components/home/Hero";
-import WelcomeIntro from "@/components/home/WelcomeIntro";
-import FeaturedServices from "@/components/home/FeaturedServices";
-import GiftVoucher from "@/components/home/GiftVoucher";
-import WhyLumera from "@/components/home/WhyLumera";
-import FeaturedReview from "@/components/home/FeaturedReview";
-import BookingCTA from "@/components/home/BookingCTA";
+export default async function Home() {
+  const featuredServices = await getFeaturedServices();
 
-export default function Home() {
   return (
     <>
       <Hero />
       <WelcomeIntro />
-      <FeaturedServices />
+      <FeaturedServices services={featuredServices} />
       <GiftVoucher />
       <WhyLumera />
       <FeaturedReview />

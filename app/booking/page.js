@@ -4,6 +4,7 @@ import BookingFlow from "@/components/booking/BookingFlow";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
+import { getServices } from "@/lib/services";
 
 export const metadata = {
   title: "Book a Treatment",
@@ -23,7 +24,9 @@ export const metadata = {
   alternates: { canonical: "/booking" },
 };
 
-export default function BookingPage() {
+export default async function BookingPage() {
+  const services = await getServices();
+
   return (
     <Section className="bg-cream">
       <Container>
@@ -37,7 +40,7 @@ export default function BookingPage() {
             <Suspense
               fallback={<div className="text-center text-muted">Loading…</div>}
             >
-              <BookingFlow />
+              <BookingFlow services={services} />
             </Suspense>
           </Reveal>
         </div>
