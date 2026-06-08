@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Container from "@/components/ui/Container";
+import NewsletterSignup from "@/components/layout/NewsletterSignup";
 
 const quickLinks = [
   { label: "Home", href: "/" },
@@ -106,6 +107,10 @@ export default function Footer() {
   return (
     <footer className="bg-sage-dark text-cream">
       <Container className="py-16">
+        {/* Newsletter signup — full-width row above the main columns */}
+        <NewsletterSignup />
+        <div className="my-10 border-t border-cream/20" />
+
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {/* Column 1 — Brand */}
           <div>
