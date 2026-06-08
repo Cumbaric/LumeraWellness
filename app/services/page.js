@@ -39,12 +39,17 @@ export default function ServicesPage() {
 
             return (
               <section key={key} className="mb-16 last:mb-0">
-                <h2 className="font-heading text-2xl font-semibold text-charcoal sm:text-3xl">
+                <h2 className="text-center font-heading text-2xl font-semibold text-charcoal sm:text-3xl">
                   {category.label}
                 </h2>
-                <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-8 flex flex-wrap justify-center gap-6">
                   {categoryServices.map((service) => (
-                    <ServiceCard key={service.id} service={service} />
+                    <div
+                      key={service.id}
+                      className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
+                    >
+                      <ServiceCard service={service} />
+                    </div>
                   ))}
                 </div>
               </section>

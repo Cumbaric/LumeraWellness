@@ -11,7 +11,7 @@ export default function ServiceCard({ service }) {
   const startingPrice = getStartingPrice(service);
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl bg-cream shadow-sm ring-1 ring-sand transition-shadow hover:shadow-md">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-cream text-center shadow-sm ring-1 ring-sand transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden">
         <Image
           src={service.image}
@@ -30,7 +30,7 @@ export default function ServiceCard({ service }) {
           {service.shortDescription}
         </p>
 
-        <div className="mt-5 flex items-center justify-between">
+        <div className="mt-5 flex flex-col items-center gap-2">
           <span className="text-sm text-charcoal">
             from{" "}
             <span className="font-medium text-sage-dark">
