@@ -13,3 +13,39 @@
     @apply font-heading;
   }
 }
+
+@layer components {
+  /* ── Animated gold underline (left-to-right) ─────────────────────────────
+     Add .link-underline to any link that should show a 2 px gold bar
+     animating in from the left on :hover and :focus-visible.
+     Add .link-underline-active alongside it to keep the underline
+     permanently visible (used for the active page link in the header).
+  ──────────────────────────────────────────────────────────────────────── */
+  .link-underline {
+    position: relative;
+    padding-bottom: 2px;
+  }
+
+  .link-underline::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    background-color: #c0a062; /* gold */
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 300ms ease-out;
+  }
+
+  .link-underline:hover::after,
+  .link-underline:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* Permanent underline for the active page link (header desktop nav only) */
+  .link-underline-active::after {
+    transform: scaleX(1);
+  }
+}
