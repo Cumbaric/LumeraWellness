@@ -43,6 +43,15 @@ export async function createBooking({
     return { ok: false, error: "Please choose a date today or in the future." };
   }
 
+  const allowedTimes = Array.from({ length: 11 }, (_, i) => {
+  const hour = 9 + i;
+  return `${String(hour).padStart(2, "0")}:00`;
+});
+
+if (!allowedTimes.includes(time)) {
+  return { ok: false, error: "Please choose a valid time slot." };
+}
+
   const supabase = await createClient();
 
   // ── 2. Verify service exists and is active ────────────────────────────────
@@ -77,6 +86,29 @@ export async function createBooking({
     };
   }
 
+  const { data: existingBooking, error: existingError } = await supabase
+  .from("bookings")
+  .select("id")
+  .eq("booking_date", date)
+  .eq("booking_time", time)
+  .in("status", ["pending", "confirmed"])
+  .maybeSingle();
+
+if (existingError) {
+  console.error("[createBooking] availability check error:", existingError.message);
+  return {
+    ok: false,
+    error: "We could not check availability. Please try again.",
+  };
+}
+
+if (existingBooking) {
+  return {
+    ok: false,
+    error: "This time slot is no longer available. Please choose another time.",
+  };
+}
+
   // ── 4. Insert the booking ─────────────────────────────────────────────────
   const { data: booking, error: insertError } = await supabase
     .from("bookings")
@@ -87,7 +119,7 @@ export async function createBooking({
       booking_date: date,
       booking_time: time,
       guest_name: name.trim(),
-      guest_email: email.trim(),
+      guest_email: email.trim().toLowerCase(),
       guest_phone: phone.trim(),
       notes: notes?.trim() || null,
       status: "pending",
