@@ -125,13 +125,24 @@ if (existingBooking) {
     status: "pending",
   });
 
-  if (insertError) {
-    console.error("[createBooking] insert error:", insertError.message);
+if (insertError) {
+  console.error("[createBooking] insert error:", insertError.message);
+
+  if (
+    insertError.code === "23505" ||
+    insertError.message?.includes("unique_active_booking_slot")
+  ) {
     return {
       ok: false,
-      error: "Something went wrong saving your booking. Please try again.",
+      error: "This time slot is no longer available. Please choose another time.",
     };
   }
+
+  return {
+    ok: false,
+    error: "Something went wrong saving your booking. Please try again.",
+  };
+}
 
   return { ok: true };
 }
