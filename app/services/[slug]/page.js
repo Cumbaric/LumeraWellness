@@ -1,13 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getServiceBySlug, getCategories } from "@/lib/services";
+import { getServiceBySlug, getServiceSlugs, getCategories } from "@/lib/services";
 import { formatPrice, formatDuration } from "@/lib/format";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
 import { Reveal, RevealItem } from "@/components/ui/Reveal";
 
-export const dynamic = "force-dynamic";
+export async function generateStaticParams() {
+  const slugs = await getServiceSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -23,7 +26,7 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: `${service.name} | Lumera Wellness`,
       description: service.shortDescription,
-      url: `https://lumera-wellness.vercel.app/services/${service.slug}`,
+      url: `https://lumerawellness.vercel.app/services/${service.slug}`,
       images: [{ url: service.image, width: 1200, height: 900, alt: service.name }],
     },
     twitter: {

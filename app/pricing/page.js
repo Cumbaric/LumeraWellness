@@ -14,7 +14,7 @@ export const metadata = {
     title: "Treatments & Pricing | Lumera Wellness",
     description:
       "Transparent pricing for every massage and wellness treatment at Lumera Wellness. Choose the duration that suits you.",
-    url: "https://lumera-wellness.vercel.app/pricing",
+    url: "https://lumerawellness.vercel.app/pricing",
   },
   twitter: {
     title: "Treatments & Pricing | Lumera Wellness",

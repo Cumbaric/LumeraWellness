@@ -14,7 +14,7 @@ export const metadata = {
     title: "Book a Treatment | Lumera Wellness",
     description:
       "Book your massage or wellness treatment at Lumera Wellness in a few simple steps. Choose your treatment, date, and time online.",
-    url: "https://lumera-wellness.vercel.app/booking",
+    url: "https://lumerawellness.vercel.app/booking",
   },
   twitter: {
     title: "Book a Treatment | Lumera Wellness",

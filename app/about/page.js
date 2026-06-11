@@ -13,7 +13,7 @@ export const metadata = {
     title: "About Us | Lumera Wellness",
     description:
       "Learn about Lumera Wellness — our story, our values, and the calm, personalized care behind every treatment.",
-    url: "https://lumera-wellness.vercel.app/about",
+    url: "https://lumerawellness.vercel.app/about",
   },
   twitter: {
     title: "About Us | Lumera Wellness",

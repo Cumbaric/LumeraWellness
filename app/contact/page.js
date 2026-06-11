@@ -12,7 +12,7 @@ export const metadata = {
     title: "Contact Us | Lumera Wellness",
     description:
       "Get in touch with Lumera Wellness. Find our location, opening hours, and send us a message to book your treatment.",
-    url: "https://lumera-wellness.vercel.app/contact",
+    url: "https://lumerawellness.vercel.app/contact",
   },
   twitter: {
     title: "Contact Us | Lumera Wellness",
