@@ -91,7 +91,7 @@ export default async function AdminReservationsPage() {
         {!bookingsError && bookings?.length ? (
           <div className="overflow-hidden rounded-[2rem] border border-sage/15 bg-white shadow-sm">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1100px] border-collapse text-left text-sm">
+              <table className="w-full min-w-[1250px] border-collapse text-left text-sm">
                 <thead className="bg-sand/40 text-xs uppercase tracking-[0.18em] text-muted">
                   <tr>
                     <th className="px-5 py-4 font-medium">Client</th>
@@ -100,7 +100,7 @@ export default async function AdminReservationsPage() {
                     <th className="px-5 py-4 font-medium">Date</th>
                     <th className="px-5 py-4 font-medium">Time</th>
                     <th className="px-5 py-4 font-medium">Status</th>
-                    <th className="px-5 py-4 font-medium">Actions</th>
+                    <th className="w-[220px] px-5 py-4 font-medium">Actions</th>
                     <th className="px-5 py-4 font-medium">Notes</th>
                   </tr>
                 </thead>
@@ -151,60 +151,81 @@ export default async function AdminReservationsPage() {
                         </span>
                       </td>
 
-                      <td className="px-5 py-5">
-  <div className="flex min-w-[170px] flex-wrap gap-2">
-                          {booking.status !== "confirmed" ? (
-                            <form
-                              action={updateBookingStatus.bind(
-                                null,
-                                booking.id,
-                                "confirmed"
-                              )}
-                            >
-                              <button
-                                type="submit"
-                                className="rounded-full bg-sage px-3 py-1 text-xs font-medium text-white transition hover:bg-sage-dark"
-                              >
-                                Confirm
-                              </button>
-                            </form>
-                          ) : null}
+                      <td className="w-[220px] px-5 py-5">
+  <div className="flex items-center gap-2 whitespace-nowrap">
+    {booking.status === "pending" ? (
+      <>
+        <form
+          action={updateBookingStatus.bind(
+            null,
+            booking.id,
+            "confirmed"
+          )}
+        >
+          <button
+            type="submit"
+            className="rounded-full bg-sage px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-sage-dark"
+          >
+            Confirm
+          </button>
+        </form>
 
-                          {booking.status !== "cancelled" ? (
-                            <form
-                              action={updateBookingStatus.bind(
-                                null,
-                                booking.id,
-                                "cancelled"
-                              )}
-                            >
-                              <button
-                                type="submit"
-                                className="rounded-full bg-clay px-3 py-1 text-xs font-medium text-white transition hover:opacity-90"
-                              >
-                                Cancel
-                              </button>
-                            </form>
-                          ) : null}
+        <form
+          action={updateBookingStatus.bind(
+            null,
+            booking.id,
+            "cancelled"
+          )}
+        >
+          <button
+            type="submit"
+            className="rounded-full bg-clay px-4 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+          >
+            Cancel
+          </button>
+        </form>
+      </>
+    ) : null}
 
-                          {booking.status !== "completed" ? (
-                            <form
-                              action={updateBookingStatus.bind(
-                                null,
-                                booking.id,
-                                "completed"
-                              )}
-                            >
-                              <button
-                                type="submit"
-                                className="rounded-full bg-charcoal px-3 py-1 text-xs font-medium text-white transition hover:bg-sage-dark"
-                              >
-                                Complete
-                              </button>
-                            </form>
-                          ) : null}
-                        </div>
-                      </td>
+    {booking.status === "confirmed" ? (
+      <>
+        <form
+          action={updateBookingStatus.bind(
+            null,
+            booking.id,
+            "completed"
+          )}
+        >
+          <button
+            type="submit"
+            className="rounded-full bg-charcoal px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-sage-dark"
+          >
+            Complete
+          </button>
+        </form>
+
+        <form
+          action={updateBookingStatus.bind(
+            null,
+            booking.id,
+            "cancelled"
+          )}
+        >
+          <button
+            type="submit"
+            className="rounded-full bg-clay px-4 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+          >
+            Cancel
+          </button>
+        </form>
+      </>
+    ) : null}
+
+    {booking.status === "completed" || booking.status === "cancelled" ? (
+      <span className="text-xs text-muted">No actions</span>
+    ) : null}
+  </div>
+</td>
 
                       <td className="max-w-[240px] px-5 py-5 text-muted">
                         {booking.notes || "—"}
