@@ -1,6 +1,5 @@
 import { Cormorant_Garamond, Inter } from "next/font/google";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -17,7 +16,7 @@ const inter = Inter({
 });
 
 // TODO: replace metadataBase with the real Vercel production URL once deployed
-const siteUrl = "https://lumerawellness.vercel.app";
+const siteUrl = "https://lumera-wellness.vercel.app";
 const defaultTitle = "Lumera Wellness | Premium Massage & Wellness Studio";
 const defaultDescription =
   "Lumera Wellness is a premium massage and wellness studio offering relaxing, therapeutic, and body treatments in a serene setting. Book your escape today.";
@@ -45,15 +44,10 @@ export const metadata = {
   },
   alternates: { canonical: "/" },
 };
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
-      <body className="flex min-h-screen flex-col">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

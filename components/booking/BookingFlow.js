@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { formatPrice, formatDuration } from "@/lib/format";
-import { createBooking } from "@/app/booking/actions";
+import { createBooking } from "@/app/(site)/booking/actions";
 
 const STEPS = ["Service", "Date", "Time", "Details"];
 
