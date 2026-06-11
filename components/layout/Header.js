@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Container from "@/components/ui/Container";
@@ -49,16 +49,56 @@ function CloseIcon() {
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  const lastScrollY = useRef(0);
   const pathname = usePathname();
 
-  // A link is active on an exact match; non-home links also stay active on
-  // nested routes (e.g. "/services" is active on "/services/[slug]").
   const isActive = (href) =>
     href === "/"
       ? pathname === "/"
       : pathname === href || pathname.startsWith(`${href}/`);
 
-  // Lock body scroll and close on Escape while the menu is open.
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    let ticking = false;
+
+    const updateHeader = () => {
+      const currentScrollY = window.scrollY;
+      const isScrollingDown = currentScrollY > lastScrollY.current;
+
+      setHasScrolled(currentScrollY > 10);
+
+      if (isOpen || currentScrollY < 80) {
+        setIsHeaderHidden(false);
+      } else {
+        setIsHeaderHidden(isScrollingDown);
+      }
+
+      lastScrollY.current = currentScrollY;
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateHeader);
+        ticking = true;
+      }
+    };
+
+    updateHeader();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -79,9 +119,18 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-sand bg-cream/80 backdrop-blur md:static">
+      <header
+        className={`sticky top-0 z-50 border-b backdrop-blur transition-[transform,opacity,box-shadow,background-color] duration-300 ease-out will-change-transform ${
+          isHeaderHidden
+            ? "pointer-events-none -translate-y-full opacity-0"
+            : "translate-y-0 opacity-100"
+        } ${
+          hasScrolled
+            ? "border-sage/15 bg-cream/90 shadow-sm"
+            : "border-sand bg-cream/80"
+        }`}
+      >
         <Container className="flex items-center justify-between py-4">
-          {/* Logo */}
           <Link href="/" onClick={close} className="flex items-baseline gap-2">
             <span className="font-heading text-2xl font-semibold text-charcoal">
               Lumera
@@ -91,10 +140,10 @@ export default function Header() {
             </span>
           </Link>
 
-          {/* Desktop nav */}
           <nav className="hidden items-center gap-8 md:flex">
             {navLinks.map((link) => {
               const active = isActive(link.href);
+
               return (
                 <Link
                   key={link.label}
@@ -112,7 +161,6 @@ export default function Header() {
             })}
           </nav>
 
-          {/* Desktop CTA */}
           <Link
             href="/booking"
             className="hidden rounded-full bg-sage px-5 py-2 text-sm font-medium text-cream transition-colors hover:bg-sage-dark md:inline-block"
@@ -120,7 +168,6 @@ export default function Header() {
             Book Now
           </Link>
 
-          {/* Mobile hamburger */}
           <button
             type="button"
             onClick={() => setIsOpen((open) => !open)}
@@ -134,10 +181,6 @@ export default function Header() {
         </Container>
       </header>
 
-      {/* Mobile menu overlay — rendered OUTSIDE the header so its `fixed`
-          positioning resolves against the viewport. (A `backdrop-filter`
-          ancestor would otherwise become the containing block, collapsing the
-          overlay to the header's height.) */}
       {isOpen && (
         <div
           id="mobile-menu"
@@ -149,6 +192,7 @@ export default function Header() {
           <nav className="flex flex-col gap-6">
             {navLinks.map((link) => {
               const active = isActive(link.href);
+
               return (
                 <Link
                   key={link.label}
