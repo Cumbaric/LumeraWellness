@@ -13,7 +13,7 @@ export const metadata = {
     title: "Massage & Wellness Treatments | Lumera Wellness",
     description:
       "Explore our full menu of massage and wellness treatments — relaxation, therapeutic, body, and couples rituals tailored to your needs.",
-    url: "https://lumerawellness.vercel.app/services",
+    url: "https://lumera-wellness.vercel.app/services",
   },
   twitter: {
     title: "Massage & Wellness Treatments | Lumera Wellness",

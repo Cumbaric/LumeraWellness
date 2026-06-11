@@ -16,7 +16,7 @@ export const metadata = {
     title: "Lumera Wellness | Premium Massage & Wellness Studio",
     description:
       "Relax, recover, and rebalance at Lumera Wellness. Premium massage and wellness treatments in a calm, welcoming space. Book online today.",
-    url: "https://lumerawellness.vercel.app",
+    url: "https://lumera-wellness.vercel.app",
   },
   twitter: {
     title: "Lumera Wellness | Premium Massage & Wellness Studio",
