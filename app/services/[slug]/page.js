@@ -1,16 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getServiceBySlug, getServiceSlugs, getCategories } from "@/lib/services";
+import { getServiceBySlug, getCategories } from "@/lib/services";
 import { formatPrice, formatDuration } from "@/lib/format";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
 import { Reveal, RevealItem } from "@/components/ui/Reveal";
 
-export async function generateStaticParams() {
-  const slugs = await getServiceSlugs();
-  return slugs.map((slug) => ({ slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
