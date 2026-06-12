@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Container from "@/components/ui/Container";
+import { createClient } from "@/lib/supabase/client";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -51,14 +52,47 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   const lastScrollY = useRef(0);
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
 
   const isActive = (href) =>
     href === "/"
       ? pathname === "/"
       : pathname === href || pathname.startsWith(`${href}/`);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (isMounted) {
+        setUser(user ?? null);
+        setIsAuthLoading(false);
+      }
+    }
+
+    loadUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setIsAuthLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   useEffect(() => {
     setIsOpen(false);
@@ -117,6 +151,13 @@ export default function Header() {
 
   const close = () => setIsOpen(false);
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setIsOpen(false);
+    router.refresh();
+  };
+
   return (
     <>
       <header
@@ -161,12 +202,51 @@ export default function Header() {
             })}
           </nav>
 
-          <Link
-            href="/booking"
-            className="hidden rounded-full bg-sage px-5 py-2 text-sm font-medium text-cream transition-colors hover:bg-sage-dark md:inline-block"
-          >
-            Book Now
-          </Link>
+          <div className="hidden items-center gap-4 md:flex">
+            {!isAuthLoading && user ? (
+              <>
+                <Link
+                  href="/account/bookings"
+                  className="text-sm font-medium text-muted transition-colors hover:text-charcoal"
+                >
+                  My Bookings
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="text-sm font-medium text-muted transition-colors hover:text-charcoal"
+                >
+                  Logout
+                </button>
+              </>
+            ) : null}
+
+            {!isAuthLoading && !user ? (
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-muted transition-colors hover:text-charcoal"
+                >
+                  Login
+                </Link>
+
+                <Link
+                  href="/register"
+                  className="text-sm font-medium text-muted transition-colors hover:text-charcoal"
+                >
+                  Register
+                </Link>
+              </>
+            ) : null}
+
+            <Link
+              href="/booking"
+              className="rounded-full bg-sage px-5 py-2 text-sm font-medium text-cream transition-colors hover:bg-sage-dark"
+            >
+              Book Now
+            </Link>
+          </div>
 
           <button
             type="button"
@@ -210,6 +290,48 @@ export default function Header() {
               );
             })}
           </nav>
+
+          <div className="mt-10 flex flex-col gap-4 border-t border-cream/15 pt-6">
+            {!isAuthLoading && user ? (
+              <>
+                <Link
+                  href="/account/bookings"
+                  onClick={close}
+                  className="text-xl font-medium text-cream transition-colors hover:text-gold"
+                >
+                  My Bookings
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="text-left text-xl font-medium text-cream transition-colors hover:text-gold"
+                >
+                  Logout
+                </button>
+              </>
+            ) : null}
+
+            {!isAuthLoading && !user ? (
+              <>
+                <Link
+                  href="/login"
+                  onClick={close}
+                  className="text-xl font-medium text-cream transition-colors hover:text-gold"
+                >
+                  Login
+                </Link>
+
+                <Link
+                  href="/register"
+                  onClick={close}
+                  className="text-xl font-medium text-cream transition-colors hover:text-gold"
+                >
+                  Register
+                </Link>
+              </>
+            ) : null}
+          </div>
 
           <Link
             href="/booking"
