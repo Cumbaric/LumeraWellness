@@ -39,7 +39,7 @@ function formatMoney(value) {
 
 function getBookingDateTimeValue(booking) {
   return `${booking.booking_date || ""} ${String(
-    booking.booking_time || ""
+    booking.booking_time || "",
   ).slice(0, 8)}`;
 }
 
@@ -69,7 +69,9 @@ function buildClientsFromBookings(bookings) {
   const clientsMap = new Map();
 
   bookings.forEach((booking) => {
-    const email = String(booking.guest_email || "").trim().toLowerCase();
+    const email = String(booking.guest_email || "")
+      .trim()
+      .toLowerCase();
     const phone = String(booking.guest_phone || "").trim();
     const fallbackKey = booking.id;
 
@@ -95,7 +97,7 @@ function buildClientsFromBookings(bookings) {
     }
 
     const currentLatestValue = getBookingDateTimeValue(
-      existingClient.latestBooking
+      existingClient.latestBooking,
     );
     const nextBookingValue = getBookingDateTimeValue(booking);
 
@@ -113,8 +115,8 @@ function buildClientsFromBookings(bookings) {
 
   return Array.from(clientsMap.values()).sort((a, b) =>
     getBookingDateTimeValue(b.latestBooking).localeCompare(
-      getBookingDateTimeValue(a.latestBooking)
-    )
+      getBookingDateTimeValue(a.latestBooking),
+    ),
   );
 }
 
@@ -159,7 +161,7 @@ export default async function AdminClientsPage({ searchParams }) {
         minutes,
         price
       )
-    `
+    `,
     )
     .order("booking_date", { ascending: false })
     .order("booking_time", { ascending: false });
@@ -305,106 +307,110 @@ export default async function AdminClientsPage({ searchParams }) {
             </p>
           </div>
         ) : null}
+        {!bookingsError && filteredClients.length > 0 ? (
+          <div className="grid gap-4">
+            {filteredClients.map((client) => {
+              const latestBooking = client.latestBooking;
+              const clientHref = `/admin/clients/${encodeURIComponent(client.key)}`;
 
-       {!bookingsError && filteredClients.length > 0 ? (
-  <div className="grid gap-4">
-    {filteredClients.map((client) => {
-      const latestBooking = client.latestBooking;
-      const clientHref = `/admin/clients/${encodeURIComponent(client.key)}`;
+              return (
+                <Link
+                  key={client.key}
+                  href={clientHref}
+                  aria-label={`View details for ${client.name}`}
+                  className="group relative block overflow-hidden rounded-[2rem] border border-sage/15 bg-white p-5 pl-6 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-sage/35 hover:shadow-[0_18px_45px_rgba(58,74,57,0.12)] focus:outline-none focus:ring-2 focus:ring-sage/30"
+                >
+                  <span className="pointer-events-none absolute inset-y-5 left-0 w-1 origin-top scale-y-0 rounded-r-full bg-sage transition-transform duration-300 ease-out group-hover:scale-y-100" />
 
-      return (
-        <Link
-          key={client.key}
-          href={clientHref}
-          aria-label={`View details for ${client.name}`}
-          className="group block rounded-[2rem] border border-sage/15 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-sage/35 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-sage/30"
-        >
-          <div className="grid gap-5 lg:grid-cols-[1.2fr_1.4fr_0.7fr_1.3fr_0.8fr_0.8fr_1.4fr] lg:items-start">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                Client
-              </p>
-              <h2 className="mt-2 font-heading text-2xl leading-tight text-charcoal transition group-hover:text-sage-dark">
-                {client.name}
-              </h2>
-              <p className="mt-1 text-xs text-muted">
-                First seen:{" "}
-                {formatDate(
-                  client.bookings[client.bookings.length - 1]?.created_at
-                )}
-              </p>
-            </div>
+                  <div className="grid gap-5 lg:grid-cols-[1.2fr_1.4fr_0.7fr_1.3fr_0.8fr_0.8fr_1.4fr] lg:items-start">
+                    <div className="transition-transform duration-300 ease-out group-hover:translate-x-1">
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Client
+                      </p>
+                      <h2 className="mt-2 font-heading text-2xl leading-tight text-charcoal transition-colors duration-300 group-hover:text-sage-dark">
+                        {client.name}
+                      </h2>
+                      <p className="mt-1 text-xs text-muted">
+                        First seen:{" "}
+                        {formatDate(
+                          client.bookings[client.bookings.length - 1]
+                            ?.created_at,
+                        )}
+                      </p>
+                    </div>
 
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                Contact
-              </p>
-              <p className="mt-2 break-words text-sm text-charcoal">
-                {client.email}
-              </p>
-              <p className="mt-1 text-sm text-muted">{client.phone}</p>
-            </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Contact
+                      </p>
+                      <p className="mt-2 break-words text-sm text-charcoal">
+                        {client.email}
+                      </p>
+                      <p className="mt-1 text-sm text-muted">{client.phone}</p>
+                    </div>
 
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                Bookings
-              </p>
-              <p className="mt-2 text-sm font-semibold text-charcoal">
-                {client.bookingCount}
-              </p>
-              <p className="mt-1 text-xs text-muted">
-                {client.bookingCount > 1 ? "Returning client" : "New client"}
-              </p>
-            </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Bookings
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-charcoal">
+                        {client.bookingCount}
+                      </p>
+                      <p className="mt-1 text-xs text-muted">
+                        {client.bookingCount > 1
+                          ? "Returning client"
+                          : "New client"}
+                      </p>
+                    </div>
 
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                Latest reservation
-              </p>
-              <p className="mt-2 text-sm font-semibold text-charcoal">
-                {latestBooking.booking_date} ·{" "}
-                {String(latestBooking.booking_time).slice(0, 5)}
-              </p>
-              <p className="mt-1 text-xs text-muted">
-                {latestBooking.services?.name || "Unknown service"}
-              </p>
-            </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Latest reservation
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-charcoal">
+                        {latestBooking.booking_date} ·{" "}
+                        {String(latestBooking.booking_time).slice(0, 5)}
+                      </p>
+                      <p className="mt-1 text-xs text-muted">
+                        {latestBooking.services?.name || "Unknown service"}
+                      </p>
+                    </div>
 
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                Status
-              </p>
-              <div className="mt-2">
-                <StatusBadge status={latestBooking.status} />
-              </div>
-            </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Status
+                      </p>
+                      <div className="mt-2">
+                        <StatusBadge status={latestBooking.status} />
+                      </div>
+                    </div>
 
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                Value
-              </p>
-              <p className="mt-2 text-sm font-semibold text-charcoal">
-                {formatMoney(client.totalValue)}
-              </p>
-            </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Value
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-charcoal">
+                        {formatMoney(client.totalValue)}
+                      </p>
+                    </div>
 
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                Notes
-              </p>
-              <p className="mt-2 line-clamp-2 text-sm text-muted">
-                {latestBooking.notes || "—"}
-              </p>
-              <p className="mt-3 text-xs font-semibold text-sage-dark opacity-0 transition group-hover:opacity-100">
-                Open client profile →
-              </p>
-            </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Notes
+                      </p>
+                      <p className="mt-2 line-clamp-2 text-sm text-muted">
+                        {latestBooking.notes || "—"}
+                      </p>
+                      <p className="mt-3 translate-x-[-6px] text-xs font-semibold text-sage-dark opacity-0 transition-all duration-300 ease-out group-hover:translate-x-0 group-hover:opacity-100">
+                        Open client profile →
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
-        </Link>
-      );
-    })}
-  </div>
-) : null}
+        ) : null}
       </div>
     </section>
   );
