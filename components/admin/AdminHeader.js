@@ -1,7 +1,18 @@
 import Link from "next/link";
 import { signOutAdmin } from "@/app/admin/actions";
 
-export default function AdminHeader({ userEmail }) {
+function getNavLinkClass(isActive) {
+  const baseClass =
+    "rounded-full px-5 py-2 text-sm font-medium transition";
+
+  if (isActive) {
+    return `${baseClass} bg-charcoal text-white hover:bg-sage-dark`;
+  }
+
+  return `${baseClass} bg-sand text-charcoal hover:bg-sage/20`;
+}
+
+export default function AdminHeader({ userEmail, activePage }) {
   return (
     <div className="mb-10 rounded-[2rem] border border-sage/15 bg-white px-6 py-5 shadow-sm">
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
@@ -20,14 +31,14 @@ export default function AdminHeader({ userEmail }) {
         <div className="flex flex-wrap items-center gap-3">
           <Link
             href="/admin/reservations"
-            className="rounded-full bg-sand px-5 py-2 text-sm font-medium text-charcoal transition hover:bg-sage/20"
+            className={getNavLinkClass(activePage === "reservations")}
           >
             Reservations
           </Link>
 
           <Link
             href="/admin/clients"
-            className="rounded-full bg-sand px-5 py-2 text-sm font-medium text-charcoal transition hover:bg-sage/20"
+            className={getNavLinkClass(activePage === "clients")}
           >
             Clients
           </Link>
@@ -35,7 +46,7 @@ export default function AdminHeader({ userEmail }) {
           <form action={signOutAdmin}>
             <button
               type="submit"
-              className="rounded-full bg-charcoal px-5 py-2 text-sm font-semibold text-white transition hover:bg-sage-dark"
+              className="rounded-full bg-clay px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90"
             >
               Logout
             </button>

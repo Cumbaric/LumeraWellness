@@ -187,7 +187,7 @@ export default async function AdminClientsPage({ searchParams }) {
   return (
     <section className="min-h-screen bg-cream px-6 py-12">
       <div className="mx-auto max-w-7xl">
-        <AdminHeader userEmail={user.email} />
+        <AdminHeader userEmail={user.email} activePage="clients" />
 
         <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
