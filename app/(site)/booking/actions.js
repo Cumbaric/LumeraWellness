@@ -11,6 +11,44 @@ import { createClient } from "@/lib/supabase/server";
  *
  * Returns { ok: true } on success, or { ok: false, error: string } on failure.
  */
+
+export async function getUnavailableSlotsByDate(date) {
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return {
+      ok: false,
+      error: "Please choose a valid date.",
+      slots: [],
+    };
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("booking_time")
+    .eq("booking_date", date)
+    .in("status", ["pending", "confirmed"]);
+
+  if (error) {
+    console.error("[getUnavailableSlotsByDate] error:", error.message);
+
+    return {
+      ok: false,
+      error: "We could not load availability. Please try again.",
+      slots: [],
+    };
+  }
+
+  const slots = Array.from(
+    new Set((data || []).map((booking) => String(booking.booking_time).slice(0, 5)))
+  );
+
+  return {
+    ok: true,
+    slots,
+  };
+}
+
 export async function createBooking({
   serviceId,
   serviceDurationId,
@@ -53,10 +91,6 @@ if (!allowedTimes.includes(time)) {
 }
 
   const supabase = await createClient();
-
-  const {
-  data: { user },
-} = await supabase.auth.getUser();
 
   // ── 2. Verify service exists and is active ────────────────────────────────
   const { data: service, error: serviceError } = await supabase
@@ -116,18 +150,18 @@ if (existingBooking) {
   // ── 4. Insert the booking ─────────────────────────────────────────────────
  const { error: insertError } = await supabase
   .from("bookings")
- .insert({
-  user_id: user?.id ?? null,
-  service_id: serviceId,
-  service_duration_id: serviceDurationId,
-  booking_date: date,
-  booking_time: time,
-  guest_name: name.trim(),
-  guest_email: email.trim().toLowerCase(),
-  guest_phone: phone.trim(),
-  notes: notes?.trim() || null,
-  status: "pending",
-});
+  .insert({
+    user_id: null, // guest booking; auth wiring comes later
+    service_id: serviceId,
+    service_duration_id: serviceDurationId,
+    booking_date: date,
+    booking_time: time,
+    guest_name: name.trim(),
+    guest_email: email.trim().toLowerCase(),
+    guest_phone: phone.trim(),
+    notes: notes?.trim() || null,
+    status: "pending",
+  });
 
 if (insertError) {
   console.error("[createBooking] insert error:", insertError.message);

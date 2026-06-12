@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { formatPrice, formatDuration } from "@/lib/format";
-import { createBooking } from "@/app/(site)/booking/actions";
+import {
+  createBooking,
+  getUnavailableSlotsByDate,
+} from "@/app/(site)/booking/actions";
 
 const STEPS = ["Service", "Date", "Time", "Details"];
 
@@ -56,8 +59,8 @@ function Stepper({ current }) {
                   isComplete
                     ? "bg-gold text-charcoal"
                     : isActive
-                    ? "bg-sage text-cream"
-                    : "bg-sand text-muted",
+                      ? "bg-sage text-cream"
+                      : "bg-sand text-muted",
                 ].join(" ")}
               >
                 {isComplete ? <CheckIcon className="h-4 w-4" /> : stepNum}
@@ -104,6 +107,9 @@ export default function BookingFlow({ services }) {
   const [durationMinutes, setDurationMinutes] = useState(null);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [unavailableSlots, setUnavailableSlots] = useState([]);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState(null);
   const [details, setDetails] = useState(initialDetails);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -114,6 +120,61 @@ export default function BookingFlow({ services }) {
   const selectedDuration =
     selectedService?.durations.find((d) => d.minutes === durationMinutes) ||
     null;
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadAvailability() {
+      if (!date) {
+        setUnavailableSlots([]);
+        setAvailabilityError(null);
+        return;
+      }
+
+      setAvailabilityLoading(true);
+      setAvailabilityError(null);
+
+      try {
+        const result = await getUnavailableSlotsByDate(date);
+
+        if (ignore) {
+          return;
+        }
+
+        if (result.ok) {
+          setUnavailableSlots(result.slots || []);
+        } else {
+          setUnavailableSlots([]);
+          setAvailabilityError(result.error || "Could not load availability.");
+        }
+      } catch (error) {
+        console.error("[BookingFlow] availability error:", error);
+
+        if (!ignore) {
+          setUnavailableSlots([]);
+          setAvailabilityError(
+            "Could not load availability. Please try again.",
+          );
+        }
+      } finally {
+        if (!ignore) {
+          setAvailabilityLoading(false);
+        }
+      }
+    }
+
+    loadAvailability();
+
+    return () => {
+      ignore = true;
+    };
+  }, [date]);
+
+  useEffect(() => {
+    if (time && unavailableSlots.includes(time)) {
+      setTime("");
+    }
+  }, [time, unavailableSlots]);
 
   const handleSelectService = (slug) => {
     setServiceSlug(slug);
@@ -128,7 +189,7 @@ export default function BookingFlow({ services }) {
   const canContinue = () => {
     if (step === 1) return Boolean(serviceSlug && durationMinutes);
     if (step === 2) return Boolean(date);
-    if (step === 3) return Boolean(time);
+    if (step === 3) return Boolean(time) && !availabilityLoading;
     return true;
   };
 
@@ -255,7 +316,7 @@ export default function BookingFlow({ services }) {
               {services.map((service) => {
                 const isSelected = service.slug === serviceSlug;
                 const lowest = Math.min(
-                  ...service.durations.map((d) => d.price)
+                  ...service.durations.map((d) => d.price),
                 );
                 return (
                   <div
@@ -306,7 +367,8 @@ export default function BookingFlow({ services }) {
                                   : "bg-sand text-charcoal hover:bg-sand/70",
                               ].join(" ")}
                             >
-                              {formatDuration(d.minutes)} — {formatPrice(d.price)}
+                              {formatDuration(d.minutes)} —{" "}
+                              {formatPrice(d.price)}
                             </button>
                           );
                         })}
@@ -326,7 +388,10 @@ export default function BookingFlow({ services }) {
               Pick a date
             </h2>
             <div className="mt-6 max-w-xs">
-              <label htmlFor="date" className="text-sm font-medium text-charcoal">
+              <label
+                htmlFor="date"
+                className="text-sm font-medium text-charcoal"
+              >
                 Preferred date
               </label>
               <input
@@ -334,7 +399,12 @@ export default function BookingFlow({ services }) {
                 type="date"
                 min={todayString()}
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) => {
+                  setDate(e.target.value);
+                  setTime("");
+                  setUnavailableSlots([]);
+                  setAvailabilityError(null);
+                }}
                 className={fieldClasses}
               />
             </div>
@@ -348,26 +418,43 @@ export default function BookingFlow({ services }) {
               Choose a time
             </h2>
             <p className="mt-2 text-sm text-muted">
-              Greyed-out times are unavailable.
+              Greyed-out times are already booked or waiting for confirmation.
             </p>
+
+            {availabilityLoading ? (
+              <p className="mt-3 text-sm text-sage-dark">
+                Checking latest availability…
+              </p>
+            ) : null}
+
+            {availabilityError ? (
+              <p role="alert" className="mt-3 text-sm text-clay">
+                {availabilityError}
+              </p>
+            ) : null}
+
             <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-4">
               {TIME_SLOTS.map((slot) => {
-                const unavailable = UNAVAILABLE_SLOTS.includes(slot);
+                const unavailable = unavailableSlots.includes(slot);
                 const active = slot === time;
+                const disabled = availabilityLoading || unavailable;
+
                 return (
                   <button
                     key={slot}
                     type="button"
-                    disabled={unavailable}
+                    disabled={disabled}
                     onClick={() => setTime(slot)}
                     aria-pressed={active}
                     className={[
                       "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                      unavailable
-                        ? "cursor-not-allowed bg-sand/50 text-muted/50 line-through"
-                        : active
-                        ? "bg-sage text-cream"
-                        : "bg-cream text-charcoal ring-1 ring-charcoal/10 hover:ring-sage",
+                      availabilityLoading
+                        ? "cursor-wait bg-sand/50 text-muted/50"
+                        : unavailable
+                          ? "cursor-not-allowed bg-sand/50 text-muted/50 line-through"
+                          : active
+                            ? "bg-sage text-cream"
+                            : "bg-cream text-charcoal ring-1 ring-charcoal/10 hover:ring-sage",
                     ].join(" ")}
                   >
                     {slot}
@@ -386,7 +473,10 @@ export default function BookingFlow({ services }) {
             </h2>
             <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label htmlFor="name" className="text-sm font-medium text-charcoal">
+                <label
+                  htmlFor="name"
+                  className="text-sm font-medium text-charcoal"
+                >
                   Name
                 </label>
                 <input
@@ -404,7 +494,10 @@ export default function BookingFlow({ services }) {
                 )}
               </div>
               <div>
-                <label htmlFor="email" className="text-sm font-medium text-charcoal">
+                <label
+                  htmlFor="email"
+                  className="text-sm font-medium text-charcoal"
+                >
                   Email
                 </label>
                 <input
@@ -422,7 +515,10 @@ export default function BookingFlow({ services }) {
                 )}
               </div>
               <div>
-                <label htmlFor="phone" className="text-sm font-medium text-charcoal">
+                <label
+                  htmlFor="phone"
+                  className="text-sm font-medium text-charcoal"
+                >
                   Phone
                 </label>
                 <input
@@ -440,7 +536,10 @@ export default function BookingFlow({ services }) {
                 )}
               </div>
               <div className="sm:col-span-2">
-                <label htmlFor="notes" className="text-sm font-medium text-charcoal">
+                <label
+                  htmlFor="notes"
+                  className="text-sm font-medium text-charcoal"
+                >
                   Notes <span className="text-muted">(optional)</span>
                 </label>
                 <textarea
