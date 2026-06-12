@@ -54,6 +54,10 @@ if (!allowedTimes.includes(time)) {
 
   const supabase = await createClient();
 
+  const {
+  data: { user },
+} = await supabase.auth.getUser();
+
   // ── 2. Verify service exists and is active ────────────────────────────────
   const { data: service, error: serviceError } = await supabase
     .from("services")
@@ -112,18 +116,18 @@ if (existingBooking) {
   // ── 4. Insert the booking ─────────────────────────────────────────────────
  const { error: insertError } = await supabase
   .from("bookings")
-  .insert({
-    user_id: null, // guest booking; auth wiring comes later
-    service_id: serviceId,
-    service_duration_id: serviceDurationId,
-    booking_date: date,
-    booking_time: time,
-    guest_name: name.trim(),
-    guest_email: email.trim().toLowerCase(),
-    guest_phone: phone.trim(),
-    notes: notes?.trim() || null,
-    status: "pending",
-  });
+ .insert({
+  user_id: user?.id ?? null,
+  service_id: serviceId,
+  service_duration_id: serviceDurationId,
+  booking_date: date,
+  booking_time: time,
+  guest_name: name.trim(),
+  guest_email: email.trim().toLowerCase(),
+  guest_phone: phone.trim(),
+  notes: notes?.trim() || null,
+  status: "pending",
+});
 
 if (insertError) {
   console.error("[createBooking] insert error:", insertError.message);
