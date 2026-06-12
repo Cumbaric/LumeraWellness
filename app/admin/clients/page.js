@@ -306,192 +306,105 @@ export default async function AdminClientsPage({ searchParams }) {
           </div>
         ) : null}
 
-        {!bookingsError && filteredClients.length > 0 ? (
-          <>
-            <div className="hidden overflow-hidden rounded-[2rem] border border-sage/15 bg-white shadow-sm lg:block">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1250px] border-collapse text-left text-sm">
-                  <thead className="bg-sand/40 text-xs uppercase tracking-[0.18em] text-muted">
-                    <tr>
-                      <th className="px-5 py-4 font-medium">Client</th>
-                      <th className="px-5 py-4 font-medium">Contact</th>
-                      <th className="px-5 py-4 font-medium">Bookings</th>
-                      <th className="px-5 py-4 font-medium">
-                        Latest reservation
-                      </th>
-                      <th className="px-5 py-4 font-medium">Latest status</th>
-                      <th className="px-5 py-4 font-medium">Total value</th>
-                      <th className="px-5 py-4 font-medium">Actions</th>
-                      <th className="px-5 py-4 font-medium">Notes</th>
-                    </tr>
-                  </thead>
+       {!bookingsError && filteredClients.length > 0 ? (
+  <div className="grid gap-4">
+    {filteredClients.map((client) => {
+      const latestBooking = client.latestBooking;
+      const clientHref = `/admin/clients/${encodeURIComponent(client.key)}`;
 
-                  <tbody className="divide-y divide-sage/10">
-                    {filteredClients.map((client) => {
-                      const latestBooking = client.latestBooking;
+      return (
+        <Link
+          key={client.key}
+          href={clientHref}
+          aria-label={`View details for ${client.name}`}
+          className="group block rounded-[2rem] border border-sage/15 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-sage/35 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-sage/30"
+        >
+          <div className="grid gap-5 lg:grid-cols-[1.2fr_1.4fr_0.7fr_1.3fr_0.8fr_0.8fr_1.4fr] lg:items-start">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                Client
+              </p>
+              <h2 className="mt-2 font-heading text-2xl leading-tight text-charcoal transition group-hover:text-sage-dark">
+                {client.name}
+              </h2>
+              <p className="mt-1 text-xs text-muted">
+                First seen:{" "}
+                {formatDate(
+                  client.bookings[client.bookings.length - 1]?.created_at
+                )}
+              </p>
+            </div>
 
-                      return (
-                        <tr key={client.key} className="align-top">
-                          <td className="px-5 py-5">
-                            <p className="font-medium text-charcoal">
-                              {client.name}
-                            </p>
-                            <p className="mt-1 text-xs text-muted">
-                              First seen:{" "}
-                              {formatDate(
-                                client.bookings[client.bookings.length - 1]
-                                  ?.created_at
-                              )}
-                            </p>
-                          </td>
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                Contact
+              </p>
+              <p className="mt-2 break-words text-sm text-charcoal">
+                {client.email}
+              </p>
+              <p className="mt-1 text-sm text-muted">{client.phone}</p>
+            </div>
 
-                          <td className="px-5 py-5 text-muted">
-                            <p>{client.email}</p>
-                            <p className="mt-1">{client.phone}</p>
-                          </td>
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                Bookings
+              </p>
+              <p className="mt-2 text-sm font-semibold text-charcoal">
+                {client.bookingCount}
+              </p>
+              <p className="mt-1 text-xs text-muted">
+                {client.bookingCount > 1 ? "Returning client" : "New client"}
+              </p>
+            </div>
 
-                          <td className="px-5 py-5">
-                            <p className="font-medium text-charcoal">
-                              {client.bookingCount}
-                            </p>
-                            <p className="mt-1 text-xs text-muted">
-                              {client.bookingCount > 1
-                                ? "Returning client"
-                                : "New client"}
-                            </p>
-                          </td>
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                Latest reservation
+              </p>
+              <p className="mt-2 text-sm font-semibold text-charcoal">
+                {latestBooking.booking_date} ·{" "}
+                {String(latestBooking.booking_time).slice(0, 5)}
+              </p>
+              <p className="mt-1 text-xs text-muted">
+                {latestBooking.services?.name || "Unknown service"}
+              </p>
+            </div>
 
-                          <td className="px-5 py-5">
-                            <p className="font-medium text-charcoal">
-                              {latestBooking.booking_date} ·{" "}
-                              {String(latestBooking.booking_time).slice(0, 5)}
-                            </p>
-                            <p className="mt-1 text-xs text-muted">
-                              {latestBooking.services?.name ||
-                                "Unknown service"}
-                            </p>
-                          </td>
-
-                          <td className="px-5 py-5">
-                            <StatusBadge status={latestBooking.status} />
-                          </td>
-
-                          <td className="px-5 py-5 font-medium text-charcoal">
-                            {formatMoney(client.totalValue)}
-                          </td>
-
-                          <td className="px-5 py-5">
-                            <Link
-                              href={`/admin/clients/${encodeURIComponent(
-                                client.key
-                              )}`}
-                              className="inline-flex rounded-full bg-charcoal px-4 py-2 text-xs font-semibold text-white transition hover:bg-sage-dark"
-                            >
-                              View details
-                            </Link>
-                          </td>
-
-                          <td className="max-w-[260px] px-5 py-5 text-muted">
-                            {latestBooking.notes || "—"}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                Status
+              </p>
+              <div className="mt-2">
+                <StatusBadge status={latestBooking.status} />
               </div>
             </div>
 
-            <div className="grid gap-4 lg:hidden">
-              {filteredClients.map((client) => {
-                const latestBooking = client.latestBooking;
-
-                return (
-                  <article
-                    key={client.key}
-                    className="rounded-[2rem] border border-sage/15 bg-white p-5 shadow-sm"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h2 className="font-heading text-2xl text-charcoal">
-                          {client.name}
-                        </h2>
-                        <p className="mt-1 text-xs text-muted">
-                          {client.bookingCount > 1
-                            ? "Returning client"
-                            : "New client"}
-                        </p>
-                      </div>
-
-                      <StatusBadge status={latestBooking.status} />
-                    </div>
-
-                    <div className="mt-5 grid gap-4 text-sm">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                          Contact
-                        </p>
-                        <p className="mt-1 text-charcoal">{client.email}</p>
-                        <p className="mt-1 text-charcoal">{client.phone}</p>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                            Bookings
-                          </p>
-                          <p className="mt-1 font-medium text-charcoal">
-                            {client.bookingCount}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                            Total value
-                          </p>
-                          <p className="mt-1 font-medium text-charcoal">
-                            {formatMoney(client.totalValue)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                          Latest reservation
-                        </p>
-                        <p className="mt-1 font-medium text-charcoal">
-                          {latestBooking.booking_date} ·{" "}
-                          {String(latestBooking.booking_time).slice(0, 5)}
-                        </p>
-                        <p className="mt-1 text-muted">
-                          {latestBooking.services?.name || "Unknown service"}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                          Notes
-                        </p>
-                        <p className="mt-1 text-muted">
-                          {latestBooking.notes || "—"}
-                        </p>
-                      </div>
-
-                      <Link
-                        href={`/admin/clients/${encodeURIComponent(
-                          client.key
-                        )}`}
-                        className="inline-flex w-fit rounded-full bg-charcoal px-5 py-2 text-xs font-semibold text-white transition hover:bg-sage-dark"
-                      >
-                        View details
-                      </Link>
-                    </div>
-                  </article>
-                );
-              })}
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                Value
+              </p>
+              <p className="mt-2 text-sm font-semibold text-charcoal">
+                {formatMoney(client.totalValue)}
+              </p>
             </div>
-          </>
-        ) : null}
+
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                Notes
+              </p>
+              <p className="mt-2 line-clamp-2 text-sm text-muted">
+                {latestBooking.notes || "—"}
+              </p>
+              <p className="mt-3 text-xs font-semibold text-sage-dark opacity-0 transition group-hover:opacity-100">
+                Open client profile →
+              </p>
+            </div>
+          </div>
+        </Link>
+      );
+    })}
+  </div>
+) : null}
       </div>
     </section>
   );
