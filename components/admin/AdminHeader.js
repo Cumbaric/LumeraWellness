@@ -13,9 +13,7 @@ export default function AdminHeader({ userEmail }) {
             Admin Dashboard
           </h2>
           {userEmail ? (
-            <p className="mt-1 text-sm text-muted">
-              Signed in as {userEmail}
-            </p>
+            <p className="mt-1 text-sm text-muted">Signed in as {userEmail}</p>
           ) : null}
         </div>
 
@@ -25,6 +23,13 @@ export default function AdminHeader({ userEmail }) {
             className="rounded-full bg-sand px-5 py-2 text-sm font-medium text-charcoal transition hover:bg-sage/20"
           >
             Reservations
+          </Link>
+
+          <Link
+            href="/admin/clients"
+            className="rounded-full bg-sand px-5 py-2 text-sm font-medium text-charcoal transition hover:bg-sage/20"
+          >
+            Clients
           </Link>
 
           <form action={signOutAdmin}>
