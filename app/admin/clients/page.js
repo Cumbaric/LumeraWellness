@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AdminHeader from "@/components/admin/AdminHeader";
@@ -73,7 +74,6 @@ function buildClientsFromBookings(bookings) {
     const fallbackKey = booking.id;
 
     const clientKey = email || phone || fallbackKey;
-
     const existingClient = clientsMap.get(clientKey);
 
     const bookingPrice = Number(booking.service_durations?.price || 0);
@@ -179,7 +179,8 @@ export default async function AdminClientsPage({ searchParams }) {
 
   const summary = {
     totalClients: clients.length,
-    returningClients: clients.filter((client) => client.bookingCount > 1).length,
+    returningClients: clients.filter((client) => client.bookingCount > 1)
+      .length,
     newClients: clients.filter((client) => client.bookingCount === 1).length,
     totalBookings: allBookings.length,
   };
@@ -292,7 +293,9 @@ export default async function AdminClientsPage({ searchParams }) {
           </div>
         ) : null}
 
-        {!bookingsError && clients.length > 0 && filteredClients.length === 0 ? (
+        {!bookingsError &&
+        clients.length > 0 &&
+        filteredClients.length === 0 ? (
           <div className="rounded-[2rem] border border-sage/15 bg-white p-10 text-center shadow-sm">
             <h2 className="font-heading text-3xl text-charcoal">
               No matching clients
@@ -307,7 +310,7 @@ export default async function AdminClientsPage({ searchParams }) {
           <>
             <div className="hidden overflow-hidden rounded-[2rem] border border-sage/15 bg-white shadow-sm lg:block">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[1100px] border-collapse text-left text-sm">
+                <table className="w-full min-w-[1250px] border-collapse text-left text-sm">
                   <thead className="bg-sand/40 text-xs uppercase tracking-[0.18em] text-muted">
                     <tr>
                       <th className="px-5 py-4 font-medium">Client</th>
@@ -318,6 +321,7 @@ export default async function AdminClientsPage({ searchParams }) {
                       </th>
                       <th className="px-5 py-4 font-medium">Latest status</th>
                       <th className="px-5 py-4 font-medium">Total value</th>
+                      <th className="px-5 py-4 font-medium">Actions</th>
                       <th className="px-5 py-4 font-medium">Notes</th>
                     </tr>
                   </thead>
@@ -374,6 +378,17 @@ export default async function AdminClientsPage({ searchParams }) {
 
                           <td className="px-5 py-5 font-medium text-charcoal">
                             {formatMoney(client.totalValue)}
+                          </td>
+
+                          <td className="px-5 py-5">
+                            <Link
+                              href={`/admin/clients/${encodeURIComponent(
+                                client.key
+                              )}`}
+                              className="inline-flex rounded-full bg-charcoal px-4 py-2 text-xs font-semibold text-white transition hover:bg-sage-dark"
+                            >
+                              View details
+                            </Link>
                           </td>
 
                           <td className="max-w-[260px] px-5 py-5 text-muted">
@@ -461,6 +476,15 @@ export default async function AdminClientsPage({ searchParams }) {
                           {latestBooking.notes || "—"}
                         </p>
                       </div>
+
+                      <Link
+                        href={`/admin/clients/${encodeURIComponent(
+                          client.key
+                        )}`}
+                        className="inline-flex w-fit rounded-full bg-charcoal px-5 py-2 text-xs font-semibold text-white transition hover:bg-sage-dark"
+                      >
+                        View details
+                      </Link>
                     </div>
                   </article>
                 );
