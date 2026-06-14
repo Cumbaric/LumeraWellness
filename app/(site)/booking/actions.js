@@ -91,6 +91,14 @@ if (!allowedTimes.includes(time)) {
 }
 
   const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) {
+    console.error("[createBooking] user lookup error:", userError.message);
+  }
 
   // ── 2. Verify service exists and is active ────────────────────────────────
   const { data: service, error: serviceError } = await supabase
@@ -151,7 +159,7 @@ if (existingBooking) {
  const { error: insertError } = await supabase
   .from("bookings")
   .insert({
-    user_id: null, // guest booking; auth wiring comes later
+    user_id: user?.id ?? null,
     service_id: serviceId,
     service_duration_id: serviceDurationId,
     booking_date: date,

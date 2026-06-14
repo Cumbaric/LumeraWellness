@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatDuration, formatPrice } from "@/lib/format";
+import { cancelOwnBooking } from "./actions";
 
 export const metadata = {
   title: "My Bookings | Lumera Wellness",
@@ -110,6 +111,7 @@ export default async function AccountBookingsPage() {
                     <th className="px-5 py-4 font-medium">Duration</th>
                     <th className="px-5 py-4 font-medium">Price</th>
                     <th className="px-5 py-4 font-medium">Status</th>
+                    <th className="px-5 py-4 font-medium">Actions</th>
                     <th className="px-5 py-4 font-medium">Notes</th>
                   </tr>
                 </thead>
@@ -138,6 +140,20 @@ export default async function AccountBookingsPage() {
                       </td>
                       <td className="px-5 py-5">
                         <StatusBadge status={booking.status} />
+                      </td>
+                      <td className="px-5 py-5">
+                        {["pending", "confirmed"].includes(booking.status) ? (
+                          <form action={cancelOwnBooking.bind(null, booking.id)}>
+                            <button
+                              type="submit"
+                              className="rounded-full border border-clay/25 px-4 py-1.5 text-xs font-semibold text-clay transition hover:bg-clay/10"
+                            >
+                              Cancel
+                            </button>
+                          </form>
+                        ) : (
+                          <span className="text-xs text-muted">No actions</span>
+                        )}
                       </td>
                       <td className="max-w-xs px-5 py-5 text-muted">
                         {booking.notes || "—"}

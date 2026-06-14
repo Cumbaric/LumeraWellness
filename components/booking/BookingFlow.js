@@ -11,14 +11,10 @@ import {
 const STEPS = ["Service", "Date", "Time", "Details"];
 
 // Mock time slots, 09:00–19:00 hourly.
-// NOTE: real availability will come from the database later.
 const TIME_SLOTS = Array.from({ length: 11 }, (_, i) => {
   const hour = 9 + i;
   return `${String(hour).padStart(2, "0")}:00`;
 });
-// Hardcoded mock "unavailable" slots to demonstrate availability UI.
-const UNAVAILABLE_SLOTS = ["11:00", "14:00", "17:00"];
-
 function todayString() {
   const d = new Date();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -93,14 +89,15 @@ function Stepper({ current }) {
 const fieldClasses =
   "mt-1.5 w-full rounded-xl border border-charcoal/15 bg-cream px-4 py-2.5 text-charcoal placeholder:text-muted/60 focus:border-sage focus:outline-none focus:ring-2 focus:ring-gold/50";
 
-const initialDetails = { name: "", email: "", phone: "", notes: "" };
+const emptyDetails = { name: "", email: "", phone: "", notes: "" };
 
-export default function BookingFlow({ services }) {
+export default function BookingFlow({ services, initialDetails = emptyDetails }) {
   const searchParams = useSearchParams();
   const presetSlug = searchParams.get("service");
   const validPreset = services.some((s) => s.slug === presetSlug)
     ? presetSlug
     : "";
+  const startingDetails = { ...emptyDetails, ...initialDetails };
 
   const [step, setStep] = useState(1);
   const [serviceSlug, setServiceSlug] = useState(validPreset);
@@ -110,7 +107,7 @@ export default function BookingFlow({ services }) {
   const [unavailableSlots, setUnavailableSlots] = useState([]);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState(null);
-  const [details, setDetails] = useState(initialDetails);
+  const [details, setDetails] = useState(startingDetails);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -244,7 +241,7 @@ export default function BookingFlow({ services }) {
     setDurationMinutes(null);
     setDate("");
     setTime("");
-    setDetails(initialDetails);
+    setDetails(startingDetails);
     setErrors({});
     setSubmitError(null);
   };

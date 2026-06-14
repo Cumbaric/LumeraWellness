@@ -5,6 +5,7 @@ import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
 import { getServices } from "@/lib/services";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
   title: "Book a Treatment",
@@ -26,6 +27,17 @@ export const metadata = {
 
 export default async function BookingPage() {
   const services = await getServices();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const initialDetails = {
+    name: user?.user_metadata?.full_name ?? "",
+    email: user?.email ?? "",
+    phone: user?.user_metadata?.phone ?? "",
+    notes: "",
+  };
 
   return (
     <Section className="bg-cream">
@@ -40,7 +52,7 @@ export default async function BookingPage() {
             <Suspense
               fallback={<div className="text-center text-muted">Loading…</div>}
             >
-              <BookingFlow services={services} />
+              <BookingFlow services={services} initialDetails={initialDetails} />
             </Suspense>
           </Reveal>
         </div>
