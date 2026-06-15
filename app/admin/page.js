@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import AdminHeader from "@/components/admin/AdminHeader";
+import AdminShell from "@/components/admin/AdminShell";
 import { updateBookingStatus } from "@/app/admin/reservations/actions";
 
 export const metadata = {
@@ -271,10 +271,7 @@ export default async function AdminDashboardPage() {
     .slice(0, 6);
 
   return (
-    <section className="min-h-screen bg-cream px-6 py-12">
-      <div className="mx-auto max-w-7xl">
-        <AdminHeader userEmail={user.email} activePage="dashboard" />
-
+    <AdminShell activePage="dashboard" title="Dashboard" userEmail={user.email}>
         <div className="mb-10 grid gap-6 lg:grid-cols-[1.4fr_0.8fr] lg:items-end">
           <div>
             <p className="mb-3 text-sm uppercase tracking-[0.3em] text-sage-dark">
@@ -480,7 +477,6 @@ export default async function AdminDashboardPage() {
             </div>
           </>
         ) : null}
-      </div>
-    </section>
+    </AdminShell>
   );
 }

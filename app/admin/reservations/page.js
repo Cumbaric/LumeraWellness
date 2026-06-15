@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { updateBookingStatus } from "./actions";
-import AdminHeader from "@/components/admin/AdminHeader";
+import AdminShell from "@/components/admin/AdminShell";
 
 export const metadata = {
   title: "Reservations | Lumera Wellness Admin",
@@ -218,10 +218,11 @@ export default async function AdminReservationsPage({ searchParams }) {
     searchQuery || statusFilter !== "all" || Boolean(dateFilter);
 
   return (
-    <section className="min-h-screen bg-cream px-6 py-12">
-      <div className="mx-auto max-w-7xl">
-        <AdminHeader userEmail={user.email} activePage="reservations" />
-
+    <AdminShell
+      activePage="reservations"
+      title="Reservations"
+      userEmail={user.email}
+    >
         <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <p className="mb-3 text-sm uppercase tracking-[0.3em] text-sage-dark">
@@ -537,7 +538,6 @@ export default async function AdminReservationsPage({ searchParams }) {
             </div>
           </>
         ) : null}
-      </div>
-    </section>
+    </AdminShell>
   );
 }
