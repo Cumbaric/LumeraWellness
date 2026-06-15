@@ -271,12 +271,12 @@ export default async function AdminClientsPage({ searchParams }) {
                   </button>
 
                   {searchQuery ? (
-                    <a
+                    <Link
                       href="/admin/clients"
                       className="rounded-full border border-sage/20 px-6 py-3 text-sm font-semibold text-charcoal transition hover:bg-sand"
                     >
                       Reset
-                    </a>
+                    </Link>
                   ) : null}
                 </div>
               </div>

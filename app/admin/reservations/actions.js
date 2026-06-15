@@ -45,6 +45,7 @@ export async function updateBookingStatus(bookingId, status) {
   }
 
   revalidatePath("/admin/reservations");
+  revalidatePath("/admin");
 
   return {
     ok: true,

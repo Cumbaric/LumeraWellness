@@ -38,7 +38,7 @@ export default function LoginForm() {
       message: "Login successful. Redirecting...",
     });
 
-    router.push("/admin/reservations");
+    router.push("/admin");
     router.refresh();
   }
 

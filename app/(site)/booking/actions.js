@@ -2,30 +2,108 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-/**
- * Server Action — insert a new booking row into Supabase.
- *
- * Accepts a plain object (NOT FormData). Called directly from the BookingFlow
- * client component. Service and duration are re-verified server-side; no price
- * data is trusted from the client.
- *
- * Returns { ok: true } on success, or { ok: false, error: string } on failure.
- */
+const BUSINESS_START_MINUTES = 9 * 60;
+const BUSINESS_END_MINUTES = 20 * 60;
+const MAX_NAME_LENGTH = 120;
+const MAX_EMAIL_LENGTH = 254;
+const MAX_PHONE_LENGTH = 40;
+const MAX_NOTES_LENGTH = 1000;
+const TIME_SLOTS = Array.from({ length: 11 }, (_, i) => {
+  const hour = 9 + i;
+  return `${String(hour).padStart(2, "0")}:00`;
+});
 
-export async function getUnavailableSlotsByDate(date) {
-  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+function getTodayDateString() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Belgrade",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  return `${year}-${month}-${day}`;
+}
+
+function timeToMinutes(time) {
+  const [hours, minutes] = String(time || "")
+    .slice(0, 5)
+    .split(":")
+    .map(Number);
+
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+    return null;
+  }
+
+  return hours * 60 + minutes;
+}
+
+function rangesOverlap(startA, endA, startB, endB) {
+  return startA < endB && startB < endA;
+}
+
+function bookingOverlapsSlot(booking, slotStart, slotEnd) {
+  const bookingStart = timeToMinutes(booking.booking_time);
+  const bookingDuration = Number(booking.service_durations?.minutes || 60);
+
+  if (bookingStart === null || !Number.isFinite(bookingDuration)) {
+    return true;
+  }
+
+  return rangesOverlap(
+    slotStart,
+    slotEnd,
+    bookingStart,
+    bookingStart + bookingDuration
+  );
+}
+
+function getUnavailableSlots(bookings, requestedMinutes) {
+  return TIME_SLOTS.filter((slot) => {
+    const slotStart = timeToMinutes(slot);
+    const slotEnd = slotStart + requestedMinutes;
+
+    if (slotEnd > BUSINESS_END_MINUTES) {
+      return true;
+    }
+
+    return (bookings || []).some((booking) =>
+      bookingOverlapsSlot(booking, slotStart, slotEnd)
+    );
+  });
+}
+
+export async function getUnavailableSlotsByDate(date, serviceDurationId) {
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !serviceDurationId) {
     return {
       ok: false,
-      error: "Please choose a valid date.",
+      error: "Please choose a valid date and duration.",
       slots: [],
     };
   }
 
   const supabase = await createClient();
 
+  const { data: duration, error: durationError } = await supabase
+    .from("service_durations")
+    .select("id, minutes")
+    .eq("id", serviceDurationId)
+    .single();
+
+  if (durationError || !duration) {
+    return {
+      ok: false,
+      error: "The selected duration is not available.",
+      slots: [],
+    };
+  }
+
   const { data, error } = await supabase
     .from("bookings")
-    .select("booking_time")
+    .select("booking_time, service_durations(minutes)")
     .eq("booking_date", date)
     .in("status", ["pending", "confirmed"]);
 
@@ -39,13 +117,9 @@ export async function getUnavailableSlotsByDate(date) {
     };
   }
 
-  const slots = Array.from(
-    new Set((data || []).map((booking) => String(booking.booking_time).slice(0, 5)))
-  );
-
   return {
     ok: true,
-    slots,
+    slots: getUnavailableSlots(data, duration.minutes),
   };
 }
 
@@ -59,36 +133,55 @@ export async function createBooking({
   phone,
   notes,
 }) {
-  // ── 1. Basic server-side validation ──────────────────────────────────────
+  const trimmedName = name?.trim() || "";
+  const trimmedEmail = email?.trim().toLowerCase() || "";
+  const trimmedPhone = phone?.trim() || "";
+  const trimmedNotes = notes?.trim() || "";
+
   if (
     !serviceId ||
     !serviceDurationId ||
     !date ||
     !time ||
-    !name?.trim() ||
-    !email?.trim() ||
-    !phone?.trim()
+    !trimmedName ||
+    !trimmedEmail ||
+    !trimmedPhone
   ) {
     return { ok: false, error: "Please fill in all required fields." };
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+  if (trimmedName.length > MAX_NAME_LENGTH) {
+    return { ok: false, error: "Name is too long." };
+  }
+
+  if (trimmedEmail.length > MAX_EMAIL_LENGTH) {
+    return { ok: false, error: "Email is too long." };
+  }
+
+  if (trimmedPhone.length > MAX_PHONE_LENGTH) {
+    return { ok: false, error: "Phone number is too long." };
+  }
+
+  if (trimmedNotes.length > MAX_NOTES_LENGTH) {
+    return { ok: false, error: "Notes are too long." };
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
     return { ok: false, error: "Please enter a valid email address." };
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  if (!/^[+()\d\s.-]{6,40}$/.test(trimmedPhone)) {
+    return { ok: false, error: "Please enter a valid phone number." };
+  }
+
+  const today = getTodayDateString();
   if (date < today) {
     return { ok: false, error: "Please choose a date today or in the future." };
   }
 
-  const allowedTimes = Array.from({ length: 11 }, (_, i) => {
-  const hour = 9 + i;
-  return `${String(hour).padStart(2, "0")}:00`;
-});
-
-if (!allowedTimes.includes(time)) {
-  return { ok: false, error: "Please choose a valid time slot." };
-}
+  if (!TIME_SLOTS.includes(time)) {
+    return { ok: false, error: "Please choose a valid time slot." };
+  }
 
   const supabase = await createClient();
   const {
@@ -100,7 +193,6 @@ if (!allowedTimes.includes(time)) {
     console.error("[createBooking] user lookup error:", userError.message);
   }
 
-  // ── 2. Verify service exists and is active ────────────────────────────────
   const { data: service, error: serviceError } = await supabase
     .from("services")
     .select("id, is_active")
@@ -114,81 +206,88 @@ if (!allowedTimes.includes(time)) {
     };
   }
 
-  // ── 3. Verify duration exists and belongs to this service ─────────────────
   const { data: duration, error: durationError } = await supabase
     .from("service_durations")
-    .select("id, service_id")
+    .select("id, service_id, minutes")
     .eq("id", serviceDurationId)
     .single();
 
-  if (
-    durationError ||
-    !duration ||
-    duration.service_id !== serviceId
-  ) {
+  if (durationError || !duration || duration.service_id !== serviceId) {
     return {
       ok: false,
       error: "The selected duration is not valid for this treatment.",
     };
   }
 
-  const { data: existingBooking, error: existingError } = await supabase
-  .from("bookings")
-  .select("id")
-  .eq("booking_date", date)
-  .eq("booking_time", time)
-  .in("status", ["pending", "confirmed"])
-  .maybeSingle();
-
-if (existingError) {
-  console.error("[createBooking] availability check error:", existingError.message);
-  return {
-    ok: false,
-    error: "We could not check availability. Please try again.",
-  };
-}
-
-if (existingBooking) {
-  return {
-    ok: false,
-    error: "This time slot is no longer available. Please choose another time.",
-  };
-}
-
-  // ── 4. Insert the booking ─────────────────────────────────────────────────
- const { error: insertError } = await supabase
-  .from("bookings")
-  .insert({
-    user_id: user?.id ?? null,
-    service_id: serviceId,
-    service_duration_id: serviceDurationId,
-    booking_date: date,
-    booking_time: time,
-    guest_name: name.trim(),
-    guest_email: email.trim().toLowerCase(),
-    guest_phone: phone.trim(),
-    notes: notes?.trim() || null,
-    status: "pending",
-  });
-
-if (insertError) {
-  console.error("[createBooking] insert error:", insertError.message);
+  const requestedStart = timeToMinutes(time);
+  const requestedEnd = requestedStart + duration.minutes;
 
   if (
-    insertError.code === "23505" ||
-    insertError.message?.includes("unique_active_booking_slot")
+    requestedStart < BUSINESS_START_MINUTES ||
+    requestedEnd > BUSINESS_END_MINUTES
   ) {
+    return {
+      ok: false,
+      error: "Please choose a time slot within business hours.",
+    };
+  }
+
+  const { data: existingBookings, error: existingError } = await supabase
+    .from("bookings")
+    .select("id, booking_time, service_durations(minutes)")
+    .eq("booking_date", date)
+    .in("status", ["pending", "confirmed"]);
+
+  if (existingError) {
+    console.error("[createBooking] availability check error:", existingError.message);
+    return {
+      ok: false,
+      error: "We could not check availability. Please try again.",
+    };
+  }
+
+  const conflictingBooking = (existingBookings || []).find((booking) =>
+    bookingOverlapsSlot(booking, requestedStart, requestedEnd)
+  );
+
+  if (conflictingBooking) {
     return {
       ok: false,
       error: "This time slot is no longer available. Please choose another time.",
     };
   }
 
-  return {
-    ok: false,
-    error: "Something went wrong saving your booking. Please try again.",
-  };
-}
+  const { error: insertError } = await supabase.from("bookings").insert({
+    user_id: user?.id ?? null,
+    service_id: serviceId,
+    service_duration_id: serviceDurationId,
+    booking_date: date,
+    booking_time: time,
+    guest_name: trimmedName,
+    guest_email: trimmedEmail,
+    guest_phone: trimmedPhone,
+    notes: trimmedNotes || null,
+    status: "pending",
+  });
+
+  if (insertError) {
+    console.error("[createBooking] insert error:", insertError.message);
+
+    if (
+      insertError.code === "23505" ||
+      insertError.message?.includes("unique_active_booking_slot")
+    ) {
+      return {
+        ok: false,
+        error: "This time slot is no longer available. Please choose another time.",
+      };
+    }
+
+    return {
+      ok: false,
+      error: "Something went wrong saving your booking. Please try again.",
+    };
+  }
 
   return { ok: true };
 }

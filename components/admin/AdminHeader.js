@@ -30,6 +30,13 @@ export default function AdminHeader({ userEmail, activePage }) {
 
         <div className="flex flex-wrap items-center gap-3">
           <Link
+            href="/admin"
+            className={getNavLinkClass(activePage === "dashboard")}
+          >
+            Dashboard
+          </Link>
+
+          <Link
             href="/admin/reservations"
             className={getNavLinkClass(activePage === "reservations")}
           >

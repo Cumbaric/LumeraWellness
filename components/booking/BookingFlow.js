@@ -90,6 +90,10 @@ const fieldClasses =
   "mt-1.5 w-full rounded-xl border border-charcoal/15 bg-cream px-4 py-2.5 text-charcoal placeholder:text-muted/60 focus:border-sage focus:outline-none focus:ring-2 focus:ring-gold/50";
 
 const emptyDetails = { name: "", email: "", phone: "", notes: "" };
+const MAX_NAME_LENGTH = 120;
+const MAX_EMAIL_LENGTH = 254;
+const MAX_PHONE_LENGTH = 40;
+const MAX_NOTES_LENGTH = 1000;
 
 export default function BookingFlow({ services, initialDetails = emptyDetails }) {
   const searchParams = useSearchParams();
@@ -117,12 +121,13 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
   const selectedDuration =
     selectedService?.durations.find((d) => d.minutes === durationMinutes) ||
     null;
+  const selectedDurationId = selectedDuration?.id;
 
   useEffect(() => {
     let ignore = false;
 
     async function loadAvailability() {
-      if (!date) {
+      if (!date || !selectedDurationId) {
         setUnavailableSlots([]);
         setAvailabilityError(null);
         return;
@@ -132,7 +137,7 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
       setAvailabilityError(null);
 
       try {
-        const result = await getUnavailableSlotsByDate(date);
+        const result = await getUnavailableSlotsByDate(date, selectedDurationId);
 
         if (ignore) {
           return;
@@ -165,7 +170,7 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
     return () => {
       ignore = true;
     };
-  }, [date]);
+  }, [date, selectedDurationId]);
 
   useEffect(() => {
     if (time && unavailableSlots.includes(time)) {
@@ -176,6 +181,16 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
   const handleSelectService = (slug) => {
     setServiceSlug(slug);
     setDurationMinutes(null); // durations differ per service
+    setTime("");
+    setUnavailableSlots([]);
+    setAvailabilityError(null);
+  };
+
+  const handleSelectDuration = (minutes) => {
+    setDurationMinutes(minutes);
+    setTime("");
+    setUnavailableSlots([]);
+    setAvailabilityError(null);
   };
 
   const handleDetailChange = (event) => {
@@ -192,13 +207,37 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
 
   const validateDetails = () => {
     const next = {};
-    if (!details.name.trim()) next.name = "Please enter your name.";
-    if (!details.email.trim()) {
+    const name = details.name.trim();
+    const email = details.email.trim();
+    const phone = details.phone.trim();
+    const notes = details.notes.trim();
+
+    if (!name) {
+      next.name = "Please enter your name.";
+    } else if (name.length > MAX_NAME_LENGTH) {
+      next.name = "Name is too long.";
+    }
+
+    if (!email) {
       next.email = "Please enter your email.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(details.email.trim())) {
+    } else if (email.length > MAX_EMAIL_LENGTH) {
+      next.email = "Email is too long.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       next.email = "Please enter a valid email address.";
     }
-    if (!details.phone.trim()) next.phone = "Please enter your phone number.";
+
+    if (!phone) {
+      next.phone = "Please enter your phone number.";
+    } else if (phone.length > MAX_PHONE_LENGTH) {
+      next.phone = "Phone number is too long.";
+    } else if (!/^[+()\d\s.-]{6,40}$/.test(phone)) {
+      next.phone = "Please enter a valid phone number.";
+    }
+
+    if (notes.length > MAX_NOTES_LENGTH) {
+      next.notes = "Notes are too long.";
+    }
+
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -355,7 +394,7 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
                             <button
                               key={d.minutes}
                               type="button"
-                              onClick={() => setDurationMinutes(d.minutes)}
+                              onClick={() => handleSelectDuration(d.minutes)}
                               aria-pressed={active}
                               className={[
                                 "rounded-full px-4 py-2 text-sm transition-colors",
@@ -480,6 +519,7 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
                   id="name"
                   name="name"
                   type="text"
+                  maxLength={MAX_NAME_LENGTH}
                   value={details.name}
                   onChange={handleDetailChange}
                   placeholder="Your name"
@@ -501,6 +541,7 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
                   id="email"
                   name="email"
                   type="email"
+                  maxLength={MAX_EMAIL_LENGTH}
                   value={details.email}
                   onChange={handleDetailChange}
                   placeholder="you@example.com"
@@ -522,6 +563,7 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
                   id="phone"
                   name="phone"
                   type="tel"
+                  maxLength={MAX_PHONE_LENGTH}
                   value={details.phone}
                   onChange={handleDetailChange}
                   placeholder="+381 ..."
@@ -543,11 +585,15 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
                   id="notes"
                   name="notes"
                   rows={3}
+                  maxLength={MAX_NOTES_LENGTH}
                   value={details.notes}
                   onChange={handleDetailChange}
                   placeholder="Anything we should know?"
                   className={`${fieldClasses} resize-y`}
                 />
+                {errors.notes && (
+                  <p className="mt-1.5 text-sm text-clay">{errors.notes}</p>
+                )}
               </div>
             </div>
           </div>

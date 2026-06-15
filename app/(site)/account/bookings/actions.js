@@ -41,6 +41,7 @@ export async function cancelOwnBooking(bookingId) {
   revalidatePath("/account/bookings");
   revalidatePath("/admin/reservations");
   revalidatePath("/admin/clients");
+  revalidatePath("/admin");
 
   return {
     ok: true,
