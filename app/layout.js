@@ -15,7 +15,6 @@ const inter = Inter({
   display: "swap",
 });
 
-// TODO: replace metadataBase with the real Vercel production URL once deployed
 const siteUrl = "https://lumera-wellness.vercel.app";
 const defaultTitle = "Lumera Wellness | Premium Massage & Wellness Studio";
 const defaultDescription =
