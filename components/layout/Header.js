@@ -48,17 +48,39 @@ function CloseIcon() {
   );
 }
 
+function PersonIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20c0-4 3.5-7 8-7s8 3 8 7" />
+    </svg>
+  );
+}
+
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [user, setUser] = useState(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
   const lastScrollY = useRef(0);
+  const accountMenuRef = useRef(null);
   const pathname = usePathname();
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
+
+  const displayName = user?.user_metadata?.full_name || user?.email || "";
 
   const isActive = (href) =>
     href === "/"
@@ -96,7 +118,33 @@ export default function Header() {
 
   useEffect(() => {
     setIsOpen(false);
+    setIsAccountMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isAccountMenuOpen) return;
+
+    const handleClickOutside = (event) => {
+      if (
+        accountMenuRef.current &&
+        !accountMenuRef.current.contains(event.target)
+      ) {
+        setIsAccountMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setIsAccountMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isAccountMenuOpen]);
 
   useEffect(() => {
     let ticking = false;
@@ -155,6 +203,7 @@ export default function Header() {
     await supabase.auth.signOut();
     setUser(null);
     setIsOpen(false);
+    setIsAccountMenuOpen(false);
     router.refresh();
   };
 
@@ -202,38 +251,70 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="hidden items-center gap-4 md:flex">
+          <div className="hidden items-center gap-3 md:flex">
             {!isAuthLoading && user ? (
-              <>
-                <Link
-                  href="/account/bookings"
-                  className="text-sm font-medium text-muted transition-colors hover:text-charcoal"
-                >
-                  My Bookings
-                </Link>
-
+              <div className="relative" ref={accountMenuRef}>
                 <button
                   type="button"
-                  onClick={handleLogout}
-                  className="text-sm font-medium text-muted transition-colors hover:text-charcoal"
+                  onClick={() => setIsAccountMenuOpen((open) => !open)}
+                  aria-haspopup="menu"
+                  aria-expanded={isAccountMenuOpen}
+                  aria-label="Account menu"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-sage text-cream transition-colors hover:bg-sage-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
                 >
-                  Logout
+                  <PersonIcon />
                 </button>
-              </>
+
+                {isAccountMenuOpen ? (
+                  <div
+                    role="menu"
+                    aria-label="Account"
+                    className="absolute right-0 top-full mt-2 min-w-[220px] rounded-xl bg-cream p-2 shadow-lg ring-1 ring-charcoal/10"
+                  >
+                    <div className="px-3 py-2">
+                      <p className="truncate text-sm font-medium text-charcoal">
+                        {displayName}
+                      </p>
+                    </div>
+
+                    <div className="my-1 border-t border-charcoal/10" />
+
+                    <Link
+                      href="/account/bookings"
+                      role="menuitem"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="block rounded-lg px-3 py-2 text-sm font-medium text-charcoal transition-colors hover:bg-sand"
+                    >
+                      My Bookings
+                    </Link>
+
+                    <div className="my-1 border-t border-charcoal/10" />
+
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={handleLogout}
+                      className="block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-clay transition-colors hover:bg-sand"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             ) : null}
 
             {!isAuthLoading && !user ? (
               <>
                 <Link
                   href="/login"
-                  className="text-sm font-medium text-muted transition-colors hover:text-charcoal"
+                  className="text-sm font-medium text-charcoal transition-colors hover:text-gold"
                 >
                   Login
                 </Link>
 
                 <Link
                   href="/register"
-                  className="text-sm font-medium text-muted transition-colors hover:text-charcoal"
+                  className="rounded-full border border-sage px-4 py-2 text-sm font-medium text-sage transition-colors hover:bg-sage/10 hover:text-sage-dark"
                 >
                   Register
                 </Link>
@@ -294,6 +375,10 @@ export default function Header() {
           <div className="mt-10 flex flex-col gap-4 border-t border-cream/15 pt-6">
             {!isAuthLoading && user ? (
               <>
+                <p className="truncate text-sm font-medium uppercase tracking-[0.15em] text-cream/60">
+                  {displayName}
+                </p>
+
                 <Link
                   href="/account/bookings"
                   onClick={close}
