@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AdminShell from "@/components/admin/AdminShell";
+import StatCard from "@/components/admin/StatCard";
 import { updateBookingStatus } from "@/app/admin/reservations/actions";
 
 export const metadata = {
@@ -47,6 +48,63 @@ function formatDate(date) {
 
 function getMonthKey(date) {
   return String(date || "").slice(0, 7);
+}
+
+// Monday–Sunday range (as YYYY-MM-DD strings) for the week containing the given
+// Belgrade-local date. Date math is done in UTC so it never drifts with the
+// server's own timezone.
+function getBelgradeWeekRange(todayString) {
+  const [year, month, day] = String(todayString).split("-").map(Number);
+  const base = new Date(Date.UTC(year, month - 1, day));
+  const weekday = base.getUTCDay(); // 0=Sun … 6=Sat
+  const daysSinceMonday = (weekday + 6) % 7;
+
+  const monday = new Date(base);
+  monday.setUTCDate(base.getUTCDate() - daysSinceMonday);
+
+  const sunday = new Date(monday);
+  sunday.setUTCDate(monday.getUTCDate() + 6);
+
+  const format = (date) => date.toISOString().slice(0, 10);
+
+  return { start: format(monday), end: format(sunday) };
+}
+
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5" aria-hidden="true">
+      <rect x="3" y="4.5" width="18" height="16" rx="2" />
+      <path d="M3 9h18M8 3v3M16 3v3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function WeekIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5" aria-hidden="true">
+      <rect x="3" y="4.5" width="18" height="16" rx="2" />
+      <path d="M3 9h18M8 3v3M16 3v3M7 13h4M7 16.5h7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ClockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function UsersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5" aria-hidden="true">
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" strokeLinecap="round" />
+      <path d="M16 6.5a3 3 0 0 1 0 6M17.5 19c0-2.2-.9-4-2.3-5.1" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 function getBookingDateTimeValue(booking) {
@@ -187,10 +245,23 @@ export default async function AdminDashboardPage() {
     redirect("/admin/login");
   }
 
-  const { data: bookings, error: bookingsError } = await supabase
-    .from("bookings")
-    .select(
-      `
+  const todayDate = getTodayDateString();
+  const monthKey = getMonthKey(todayDate);
+  const { start: weekStart, end: weekEnd } = getBelgradeWeekRange(todayDate);
+
+  // KPI counts use head:true count queries so we only pull the count, not rows.
+  // They run in parallel with the full bookings fetch (still needed for the
+  // panels and tables further down the page).
+  const [
+    bookingsResult,
+    todayCountResult,
+    weekCountResult,
+    pendingCountResult,
+  ] = await Promise.all([
+    supabase
+      .from("bookings")
+      .select(
+        `
       id,
       booking_date,
       booking_time,
@@ -208,22 +279,37 @@ export default async function AdminDashboardPage() {
         price
       )
     `
-    )
-    .order("booking_date", { ascending: true })
-    .order("booking_time", { ascending: true });
+      )
+      .order("booking_date", { ascending: true })
+      .order("booking_time", { ascending: true }),
+    supabase
+      .from("bookings")
+      .select("*", { count: "exact", head: true })
+      .eq("booking_date", todayDate),
+    supabase
+      .from("bookings")
+      .select("*", { count: "exact", head: true })
+      .gte("booking_date", weekStart)
+      .lte("booking_date", weekEnd),
+    supabase
+      .from("bookings")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "pending"),
+  ]);
+
+  const { data: bookings, error: bookingsError } = bookingsResult;
+
+  const todayCount = todayCountResult.count ?? 0;
+  const weekCount = weekCountResult.count ?? 0;
+  const pendingCount = pendingCountResult.count ?? 0;
 
   const allBookings = bookings || [];
-  const todayDate = getTodayDateString();
-  const monthKey = getMonthKey(todayDate);
 
   const activeBookings = allBookings.filter(
     (booking) => booking.status !== "cancelled"
   );
   const todayBookings = activeBookings.filter(
     (booking) => booking.booking_date === todayDate
-  );
-  const pendingBookings = allBookings.filter(
-    (booking) => booking.status === "pending"
   );
   const confirmedBookings = allBookings.filter(
     (booking) => booking.status === "confirmed"
@@ -236,6 +322,9 @@ export default async function AdminDashboardPage() {
     0
   );
 
+  // Total clients: there is no `profiles` table in this schema (registered users
+  // live in auth.users, which isn't queryable under RLS here), so we count unique
+  // clients by distinct guest_email (falling back to phone) from bookings.
   const clientKeys = new Set();
   allBookings.forEach((booking) => {
     const key =
@@ -302,6 +391,35 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
+        {/* Phase 1: KPI stat cards. These 4 cards always render (fed by their own
+            count queries), independent of whether the full bookings list loaded. */}
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            label="Today's bookings"
+            value={todayCount}
+            hint={todayDate}
+            icon={<CalendarIcon />}
+          />
+          <StatCard
+            label="This week's bookings"
+            value={weekCount}
+            hint={`${weekStart} – ${weekEnd}`}
+            icon={<WeekIcon />}
+          />
+          <StatCard
+            label="Pending bookings"
+            value={pendingCount}
+            hint="Awaiting admin review"
+            icon={<ClockIcon />}
+          />
+          <StatCard
+            label="Total clients"
+            value={clientKeys.size}
+            hint="Unique guest emails"
+            icon={<UsersIcon />}
+          />
+        </div>
+
         {bookingsError ? (
           <div className="mb-8 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
             Failed to load dashboard data. Please try again.
@@ -310,18 +428,9 @@ export default async function AdminDashboardPage() {
 
         {!bookingsError ? (
           <>
-            <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-              <MetricCard
-                label="Today"
-                value={todayBookings.length}
-                helper={todayDate}
-                tone="dark"
-              />
-              <MetricCard
-                label="Pending"
-                value={pendingBookings.length}
-                helper="Need admin review"
-              />
+            {/* Secondary metrics: Confirmed + monthly revenue are kept here (not
+                duplicated in the KPI row above) so no existing feature is lost. */}
+            <div className="mb-8 grid gap-4 sm:grid-cols-2">
               <MetricCard
                 label="Confirmed"
                 value={confirmedBookings.length}
@@ -331,11 +440,6 @@ export default async function AdminDashboardPage() {
                 label="Month revenue"
                 value={formatMoney(monthlyRevenue)}
                 helper={monthKey}
-              />
-              <MetricCard
-                label="Clients"
-                value={clientKeys.size}
-                helper="Unique email or phone"
               />
             </div>
 
