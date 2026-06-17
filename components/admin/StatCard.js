@@ -14,7 +14,7 @@ export default function StatCard({ label, value, hint, icon, children }) {
   const badge = icon ?? children;
 
   return (
-    <div className="relative rounded-2xl bg-cream p-5 shadow-sm ring-1 ring-charcoal/10">
+    <div className="relative rounded-2xl bg-white p-5 shadow-sm ring-1 ring-charcoal/10">
       {badge ? (
         <span
           aria-hidden="true"

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AdminShell from "@/components/admin/AdminShell";
 import StatCard from "@/components/admin/StatCard";
+import BookingsByServiceChart from "@/components/admin/BookingsByServiceChart";
 import { updateBookingStatus } from "@/app/admin/reservations/actions";
 
 export const metadata = {
@@ -194,7 +195,7 @@ function QuickActions({ booking }) {
 
 function BookingRow({ booking }) {
   return (
-    <div className="grid gap-4 border-b border-sage/10 py-4 last:border-b-0 md:grid-cols-[1.2fr_1fr_0.8fr_0.8fr_1fr] md:items-center">
+    <div className="grid gap-4 rounded-2xl bg-cream p-4 ring-1 ring-sage/10 md:grid-cols-[1.2fr_1fr_0.8fr_0.8fr_1fr] md:items-center">
       <div>
         <p className="font-medium text-charcoal">{booking.guest_name}</p>
         <p className="mt-1 text-xs text-muted">{booking.guest_email}</p>
@@ -346,6 +347,25 @@ export default async function AdminDashboardPage() {
     (a, b) => b[1] - a[1]
   )[0];
 
+  // Bookings-by-service chart data: count ALL bookings (every status) per service,
+  // reusing the services(name) already joined on allBookings. Only services with
+  // at least one booking are included; sorted tallest -> shortest.
+  const bookingsByServiceMap = new Map();
+  allBookings.forEach((booking) => {
+    const serviceName = booking.services?.name;
+    if (!serviceName) {
+      return;
+    }
+    bookingsByServiceMap.set(
+      serviceName,
+      (bookingsByServiceMap.get(serviceName) || 0) + 1
+    );
+  });
+
+  const bookingsByService = Array.from(bookingsByServiceMap.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+
   const recentBookings = [...allBookings]
     .sort((a, b) =>
       String(b.created_at || "").localeCompare(String(a.created_at || ""))
@@ -443,6 +463,28 @@ export default async function AdminDashboardPage() {
               />
             </div>
 
+            <div className="mb-8 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-charcoal/10">
+              <div className="mb-5">
+                <p className="text-xs uppercase tracking-[0.22em] text-muted">
+                  Insights
+                </p>
+                <h2 className="mt-2 font-heading text-3xl text-charcoal">
+                  Most requested treatments
+                </h2>
+                <p className="mt-1 text-sm text-muted">
+                  Total bookings per service, across all statuses.
+                </p>
+              </div>
+
+              {bookingsByService.length > 0 ? (
+                <BookingsByServiceChart data={bookingsByService} />
+              ) : (
+                <p className="py-12 text-center text-sm text-muted">
+                  No bookings yet — chart will appear once you have bookings.
+                </p>
+              )}
+            </div>
+
             <div className="mb-8 grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
               <div className="rounded-[2rem] border border-sage/15 bg-white p-6 shadow-sm">
                 <div className="mb-5 flex items-start justify-between gap-4">
@@ -463,7 +505,7 @@ export default async function AdminDashboardPage() {
                 </div>
 
                 {upcomingBookings.length > 0 ? (
-                  <div>
+                  <div className="grid gap-3">
                     {upcomingBookings.map((booking) => (
                       <BookingRow key={booking.id} booking={booking} />
                     ))}
