@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import AdminShell from "@/components/admin/AdminShell";
 import StatCard from "@/components/admin/StatCard";
 import BookingsByServiceChart from "@/components/admin/BookingsByServiceChart";
+import NewBookingButton from "@/components/admin/NewBookingButton";
+import { getServices } from "@/lib/services";
 import { updateBookingStatus } from "@/app/admin/reservations/actions";
 
 export const metadata = {
@@ -258,6 +260,7 @@ export default async function AdminDashboardPage() {
     todayCountResult,
     weekCountResult,
     pendingCountResult,
+    services,
   ] = await Promise.all([
     supabase
       .from("bookings")
@@ -296,6 +299,7 @@ export default async function AdminDashboardPage() {
       .from("bookings")
       .select("*", { count: "exact", head: true })
       .eq("status", "pending"),
+    getServices(),
   ]);
 
   const { data: bookings, error: bookingsError } = bookingsResult;
@@ -380,7 +384,17 @@ export default async function AdminDashboardPage() {
     .slice(0, 6);
 
   return (
-    <AdminShell activePage="dashboard" title="Dashboard" userEmail={user.email}>
+    <AdminShell
+      activePage="dashboard"
+      title="Dashboard"
+      userEmail={user.email}
+      headerAction={
+        <NewBookingButton
+          services={services}
+          className="w-fit rounded-full border border-sage/20 bg-white px-5 py-3 text-sm font-semibold text-charcoal shadow-sm transition hover:bg-sand"
+        />
+      }
+    >
         <div className="mb-10 grid gap-6 lg:grid-cols-[1.4fr_0.8fr] lg:items-end">
           <div>
             <p className="mb-3 text-sm uppercase tracking-[0.3em] text-sage-dark">
@@ -402,12 +416,10 @@ export default async function AdminDashboardPage() {
             >
               Review pending
             </Link>
-            <Link
-              href="/booking"
+            <NewBookingButton
+              services={services}
               className="rounded-full border border-sage/20 bg-white px-5 py-3 text-sm font-semibold text-charcoal transition hover:bg-sand"
-            >
-              New booking
-            </Link>
+            />
           </div>
         </div>
 

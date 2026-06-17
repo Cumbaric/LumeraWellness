@@ -18,7 +18,13 @@ function getNavClass(isActive) {
   return `${baseClass} text-muted hover:bg-sand/70 hover:text-charcoal`;
 }
 
-export default function AdminShell({ activePage, children, title, userEmail }) {
+export default function AdminShell({
+  activePage,
+  children,
+  title,
+  userEmail,
+  headerAction,
+}) {
   return (
     <section className="min-h-screen bg-cream lg:grid lg:grid-cols-[280px_1fr]">
       <aside className="border-b border-sage/15 bg-white px-5 py-5 lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
@@ -83,12 +89,14 @@ export default function AdminShell({ activePage, children, title, userEmail }) {
                 {title}
               </h2>
             </div>
-            <Link
-              href="/booking"
-              className="w-fit rounded-full border border-sage/20 bg-white px-5 py-3 text-sm font-semibold text-charcoal shadow-sm transition hover:bg-sand"
-            >
-              New booking
-            </Link>
+            {headerAction ?? (
+              <Link
+                href="/booking"
+                className="w-fit rounded-full border border-sage/20 bg-white px-5 py-3 text-sm font-semibold text-charcoal shadow-sm transition hover:bg-sand"
+              >
+                New booking
+              </Link>
+            )}
           </div>
 
           {children}
