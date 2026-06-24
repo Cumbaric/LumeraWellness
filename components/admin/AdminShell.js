@@ -4,6 +4,7 @@ import { signOutAdmin } from "@/app/admin/actions";
 const navItems = [
   { label: "Dashboard", href: "/admin", key: "dashboard" },
   { label: "Reservations", href: "/admin/reservations", key: "reservations" },
+  { label: "Calendar", href: "/admin/calendar", key: "calendar" },
   { label: "Clients", href: "/admin/clients", key: "clients" },
 ];
 
@@ -89,14 +90,24 @@ export default function AdminShell({
                 {title}
               </h2>
             </div>
-            {headerAction ?? (
-              <Link
-                href="/booking"
-                className="w-fit rounded-full border border-sage/20 bg-white px-5 py-3 text-sm font-semibold text-charcoal shadow-sm transition hover:bg-sand"
-              >
-                New booking
-              </Link>
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              {activePage !== "dashboard" ? (
+                <Link
+                  href="/admin"
+                  className="w-fit rounded-full bg-charcoal px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-sage-dark"
+                >
+                  ← Dashboard
+                </Link>
+              ) : null}
+              {headerAction ?? (
+                <Link
+                  href="/"
+                  className="w-fit rounded-full border border-sage/20 bg-white px-5 py-3 text-sm font-semibold text-charcoal shadow-sm transition hover:bg-sand"
+                >
+                  Go to site
+                </Link>
+              )}
+            </div>
           </div>
 
           {children}

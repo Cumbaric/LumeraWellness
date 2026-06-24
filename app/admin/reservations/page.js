@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { updateBookingStatus } from "./actions";
 import AdminShell from "@/components/admin/AdminShell";
+import EditBookingButton from "@/components/admin/EditBookingButton";
+import { getServices } from "@/lib/services";
 
 export const metadata = {
   title: "Reservations | Lumera Wellness Admin",
@@ -72,9 +74,13 @@ function StatusBadge({ status }) {
   );
 }
 
-function ReservationActions({ booking }) {
+function ReservationActions({ booking, services }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
+      {booking.status === "pending" || booking.status === "confirmed" ? (
+        <EditBookingButton booking={booking} services={services} />
+      ) : null}
+
       {booking.status === "pending" ? (
         <>
           <form action={updateBookingStatus.bind(null, booking.id, "confirmed")}>
@@ -152,30 +158,37 @@ export default async function AdminReservationsPage({ searchParams }) {
     redirect("/admin/login");
   }
 
-  const { data: bookings, error: bookingsError } = await supabase
-    .from("bookings")
-    .select(
+  const [bookingsResult, services] = await Promise.all([
+    supabase
+      .from("bookings")
+      .select(
+        `
+        id,
+        service_id,
+        service_duration_id,
+        booking_date,
+        booking_time,
+        guest_name,
+        guest_email,
+        guest_phone,
+        notes,
+        status,
+        created_at,
+        services (
+          name
+        ),
+        service_durations (
+          minutes,
+          price
+        )
       `
-      id,
-      booking_date,
-      booking_time,
-      guest_name,
-      guest_email,
-      guest_phone,
-      notes,
-      status,
-      created_at,
-      services (
-        name
-      ),
-      service_durations (
-        minutes,
-        price
       )
-    `
-    )
-    .order("booking_date", { ascending: true })
-    .order("booking_time", { ascending: true });
+      .order("booking_date", { ascending: true })
+      .order("booking_time", { ascending: true }),
+    getServices(),
+  ]);
+
+  const { data: bookings, error: bookingsError } = bookingsResult;
 
   const allBookings = bookings || [];
 
@@ -442,7 +455,7 @@ export default async function AdminReservationsPage({ searchParams }) {
                         </td>
 
                         <td className="w-[220px] px-5 py-5">
-                          <ReservationActions booking={booking} />
+                          <ReservationActions booking={booking} services={services} />
                         </td>
 
                         <td className="max-w-[240px] px-5 py-5 text-muted">
@@ -530,7 +543,7 @@ export default async function AdminReservationsPage({ searchParams }) {
                       <p className="mb-2 text-xs uppercase tracking-[0.18em] text-muted">
                         Actions
                       </p>
-                      <ReservationActions booking={booking} />
+                      <ReservationActions booking={booking} services={services} />
                     </div>
                   </div>
                 </article>

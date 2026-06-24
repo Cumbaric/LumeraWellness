@@ -1,20 +1,8 @@
 "use client";
 
-/**
- * NewBookingModal — admin manual booking entry (e.g. a booking taken by phone).
- *
- * Presentational form + client validation. On submit it calls the
- * createAdminBooking Server Action, which re-validates everything server-side
- * and inserts a pending guest booking (user_id null). On success it refreshes
- * the dashboard so KPIs and lists update, then closes.
- *
- * Props:
- *   services  Array<{ id, name, durations: [{ id, minutes, price }] }>
- *   onClose   () => void
- */
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createAdminBooking } from "@/app/admin/actions";
+import { updateAdminBooking } from "@/app/admin/reservations/actions";
 import { formatDuration, formatPrice } from "@/lib/format";
 
 const TIME_SLOTS = Array.from({ length: 11 }, (_, i) => {
@@ -42,19 +30,21 @@ const fieldClass =
 const labelClass = "text-xs font-medium uppercase tracking-wide text-muted";
 const errorClass = "mt-1 text-xs text-clay";
 
-export default function NewBookingModal({ services, onClose, initialDate }) {
+export default function EditBookingModal({ booking, services, onClose }) {
   const router = useRouter();
   const today = useMemo(() => getTodayBelgrade(), []);
   const titleId = useId();
 
-  const [serviceId, setServiceId] = useState("");
-  const [durationId, setDurationId] = useState("");
-  const [date, setDate] = useState(initialDate && initialDate >= today ? initialDate : today);
-  const [time, setTime] = useState("");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [notes, setNotes] = useState("");
+  const [serviceId, setServiceId] = useState(booking.service_id || "");
+  const [durationId, setDurationId] = useState(booking.service_duration_id || "");
+  const [date, setDate] = useState(booking.booking_date || today);
+  const [time, setTime] = useState(
+    String(booking.booking_time || "").slice(0, 5)
+  );
+  const [name, setName] = useState(booking.guest_name || "");
+  const [phone, setPhone] = useState(booking.guest_phone || "");
+  const [email, setEmail] = useState(booking.guest_email || "");
+  const [notes, setNotes] = useState(booking.notes || "");
 
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState("");
@@ -68,7 +58,6 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
   );
   const durations = selectedService?.durations ?? [];
 
-  // Move focus into the dialog, lock body scroll, and close on Escape.
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
@@ -88,7 +77,7 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
 
   function handleServiceChange(value) {
     setServiceId(value);
-    setDurationId(""); // duration options depend on the service
+    setDurationId("");
   }
 
   function validate() {
@@ -137,7 +126,8 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
 
     setSubmitting(true);
 
-    const result = await createAdminBooking({
+    const result = await updateAdminBooking({
+      bookingId: booking.id,
       serviceId,
       serviceDurationId: durationId,
       date,
@@ -173,13 +163,13 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-sage-dark">
-              Manual entry
+              Edit reservation
             </p>
             <h2
               id={titleId}
               className="mt-1 font-heading text-3xl text-charcoal"
             >
-              New Booking
+              Edit Booking
             </h2>
           </div>
           <button
@@ -204,11 +194,11 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
 
         <form onSubmit={handleSubmit} noValidate className="grid gap-4">
           <div>
-            <label htmlFor="nb-service" className={labelClass}>
+            <label htmlFor="eb-service" className={labelClass}>
               Treatment
             </label>
             <select
-              id="nb-service"
+              id="eb-service"
               ref={firstFieldRef}
               value={serviceId}
               onChange={(event) => handleServiceChange(event.target.value)}
@@ -225,11 +215,11 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
           </div>
 
           <div>
-            <label htmlFor="nb-duration" className={labelClass}>
+            <label htmlFor="eb-duration" className={labelClass}>
               Duration
             </label>
             <select
-              id="nb-duration"
+              id="eb-duration"
               value={durationId}
               onChange={(event) => setDurationId(event.target.value)}
               disabled={!selectedService}
@@ -253,11 +243,11 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="nb-date" className={labelClass}>
+              <label htmlFor="eb-date" className={labelClass}>
                 Date
               </label>
               <input
-                id="nb-date"
+                id="eb-date"
                 type="date"
                 value={date}
                 min={today}
@@ -268,11 +258,11 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
             </div>
 
             <div>
-              <label htmlFor="nb-time" className={labelClass}>
+              <label htmlFor="eb-time" className={labelClass}>
                 Time
               </label>
               <select
-                id="nb-time"
+                id="eb-time"
                 value={time}
                 onChange={(event) => setTime(event.target.value)}
                 className={fieldClass}
@@ -289,11 +279,11 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
           </div>
 
           <div>
-            <label htmlFor="nb-name" className={labelClass}>
+            <label htmlFor="eb-name" className={labelClass}>
               Guest name
             </label>
             <input
-              id="nb-name"
+              id="eb-name"
               type="text"
               value={name}
               maxLength={120}
@@ -305,11 +295,11 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="nb-phone" className={labelClass}>
+              <label htmlFor="eb-phone" className={labelClass}>
                 Guest phone
               </label>
               <input
-                id="nb-phone"
+                id="eb-phone"
                 type="tel"
                 value={phone}
                 maxLength={40}
@@ -320,11 +310,11 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
             </div>
 
             <div>
-              <label htmlFor="nb-email" className={labelClass}>
+              <label htmlFor="eb-email" className={labelClass}>
                 Guest email
               </label>
               <input
-                id="nb-email"
+                id="eb-email"
                 type="email"
                 value={email}
                 maxLength={254}
@@ -336,11 +326,11 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
           </div>
 
           <div>
-            <label htmlFor="nb-notes" className={labelClass}>
+            <label htmlFor="eb-notes" className={labelClass}>
               Notes <span className="normal-case text-muted/70">(optional)</span>
             </label>
             <textarea
-              id="nb-notes"
+              id="eb-notes"
               value={notes}
               maxLength={1000}
               rows={3}
@@ -371,7 +361,7 @@ export default function NewBookingModal({ services, onClose, initialDate }) {
               disabled={submitting}
               className="rounded-full bg-sage px-6 py-2.5 text-sm font-semibold text-cream transition hover:bg-sage-dark disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {submitting ? "Saving…" : "Save booking"}
+              {submitting ? "Saving…" : "Save changes"}
             </button>
           </div>
         </form>
