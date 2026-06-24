@@ -105,6 +105,7 @@ export async function updateBookingStatus(bookingId, status) {
 
   revalidatePath("/admin/reservations");
   revalidatePath("/admin");
+  revalidatePath("/admin/calendar");
 
   return {
     ok: true,

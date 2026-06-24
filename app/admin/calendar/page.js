@@ -1,36 +1,26 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AdminShell from "@/components/admin/AdminShell";
-import WeeklyCalendar from "@/components/admin/WeeklyCalendar";
+import MonthlyCalendar from "@/components/admin/MonthlyCalendar";
 import { getServices } from "@/lib/services";
 
 export const metadata = {
   title: "Calendar | Lumera Wellness Admin",
-  description: "Weekly calendar view of Lumera Wellness appointments.",
+  description: "Monthly calendar view of Lumera Wellness appointments.",
 };
 
 export const dynamic = "force-dynamic";
 
-function getCurrentMondayBelgrade() {
+function getCurrentYearMonth() {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Belgrade",
     year: "numeric",
     month: "2-digit",
-    day: "2-digit",
   }).formatToParts(new Date());
 
-  const get = (type) => parts.find((p) => p.type === type)?.value;
-  const todayStr = `${get("year")}-${get("month")}-${get("day")}`;
-
-  const [year, month, day] = todayStr.split("-").map(Number);
-  const base = new Date(Date.UTC(year, month - 1, day));
-  const weekday = base.getUTCDay();
-  const daysSinceMonday = (weekday + 6) % 7;
-
-  const monday = new Date(base);
-  monday.setUTCDate(base.getUTCDate() - daysSinceMonday);
-
-  return monday.toISOString().slice(0, 10);
+  const year = parts.find((p) => p.type === "year")?.value;
+  const month = parts.find((p) => p.type === "month")?.value;
+  return `${year}-${month}`;
 }
 
 function getParamValue(value) {
@@ -38,16 +28,13 @@ function getParamValue(value) {
   return value || "";
 }
 
-function isValidMonday(dateStr) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const d = new Date(Date.UTC(year, month - 1, day));
-  return d.getUTCDay() === 1;
+function isValidYearMonth(str) {
+  return /^\d{4}-\d{2}$/.test(str);
 }
 
 export default async function AdminCalendarPage({ searchParams }) {
   const resolvedSearchParams = await searchParams;
-  const weekParam = getParamValue(resolvedSearchParams?.week);
+  const monthParam = getParamValue(resolvedSearchParams?.month);
 
   const supabase = await createClient();
 
@@ -55,25 +42,19 @@ export default async function AdminCalendarPage({ searchParams }) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/admin/login");
-  }
+  if (!user) redirect("/admin/login");
 
   const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin");
+  if (adminError || !isAdmin) redirect("/admin/login");
 
-  if (adminError || !isAdmin) {
-    redirect("/admin/login");
-  }
+  const yearMonth = isValidYearMonth(monthParam)
+    ? monthParam
+    : getCurrentYearMonth();
 
-  const weekStart = isValidMonday(weekParam)
-    ? weekParam
-    : getCurrentMondayBelgrade();
-
-  const [year, month, day] = weekStart.split("-").map(Number);
-  const mondayUTC = new Date(Date.UTC(year, month - 1, day));
-  const sundayUTC = new Date(mondayUTC);
-  sundayUTC.setUTCDate(mondayUTC.getUTCDate() + 6);
-  const weekEnd = sundayUTC.toISOString().slice(0, 10);
+  const [year, month] = yearMonth.split("-").map(Number);
+  const firstDay = `${yearMonth}-01`;
+  const lastDayDate = new Date(Date.UTC(year, month, 0));
+  const lastDay = lastDayDate.toISOString().slice(0, 10);
 
   const [bookingsResult, services] = await Promise.all([
     supabase
@@ -91,17 +72,12 @@ export default async function AdminCalendarPage({ searchParams }) {
         notes,
         status,
         created_at,
-        services (
-          name
-        ),
-        service_durations (
-          minutes,
-          price
-        )
+        services ( name ),
+        service_durations ( minutes, price )
       `
       )
-      .gte("booking_date", weekStart)
-      .lte("booking_date", weekEnd)
+      .gte("booking_date", firstDay)
+      .lte("booking_date", lastDay)
       .order("booking_date", { ascending: true })
       .order("booking_time", { ascending: true }),
     getServices(),
@@ -110,15 +86,11 @@ export default async function AdminCalendarPage({ searchParams }) {
   const bookings = bookingsResult.data || [];
 
   return (
-    <AdminShell
-      activePage="calendar"
-      title="Calendar"
-      userEmail={user.email}
-    >
-      <WeeklyCalendar
+    <AdminShell activePage="calendar" title="Calendar" userEmail={user.email}>
+      <MonthlyCalendar
         bookings={bookings}
         services={services}
-        weekStart={weekStart}
+        yearMonth={yearMonth}
       />
     </AdminShell>
   );
