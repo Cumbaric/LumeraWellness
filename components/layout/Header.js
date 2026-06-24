@@ -71,6 +71,7 @@ export default function Header() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
@@ -95,9 +96,14 @@ export default function Header() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (isMounted) {
-        setUser(user ?? null);
-        setIsAuthLoading(false);
+      if (!isMounted) return;
+
+      setUser(user ?? null);
+      setIsAuthLoading(false);
+
+      if (user) {
+        const { data: adminFlag } = await supabase.rpc("is_admin");
+        if (isMounted) setIsAdmin(!!adminFlag);
       }
     }
 
@@ -106,8 +112,10 @@ export default function Header() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
       setUser(session?.user ?? null);
       setIsAuthLoading(false);
+      if (!session?.user) setIsAdmin(false);
     });
 
     return () => {
@@ -279,6 +287,20 @@ export default function Header() {
 
                     <div className="my-1 border-t border-charcoal/10" />
 
+                    {isAdmin ? (
+                      <>
+                        <Link
+                          href="/admin"
+                          role="menuitem"
+                          onClick={() => setIsAccountMenuOpen(false)}
+                          className="block rounded-lg px-3 py-2 text-sm font-medium text-charcoal transition-colors hover:bg-sand"
+                        >
+                          Admin Panel
+                        </Link>
+                        <div className="my-1 border-t border-charcoal/10" />
+                      </>
+                    ) : null}
+
                     <Link
                       href="/account/bookings"
                       role="menuitem"
@@ -378,6 +400,16 @@ export default function Header() {
                 <p className="truncate text-sm font-medium uppercase tracking-[0.15em] text-cream/60">
                   {displayName}
                 </p>
+
+                {isAdmin ? (
+                  <Link
+                    href="/admin"
+                    onClick={close}
+                    className="text-xl font-medium text-cream transition-colors hover:text-gold"
+                  >
+                    Admin Panel
+                  </Link>
+                ) : null}
 
                 <Link
                   href="/account/bookings"
