@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import EditBookingModal from "./EditBookingModal";
 import NewBookingModal from "./NewBookingModal";
-import { updateBookingStatus } from "@/app/admin/reservations/actions";
 
 const STATUS_CHIP = {
   pending:   "bg-amber-50 border-amber-200 text-amber-800",
@@ -354,36 +354,12 @@ export default function MonthlyCalendar({ bookings, services, yearMonth }) {
                         Edit
                       </button>
                     ) : null}
-
-                    {booking.status === "pending" ? (
-                      <>
-                        <form action={updateBookingStatus.bind(null, booking.id, "confirmed")}>
-                          <button type="submit" className="rounded-full bg-sage px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-sage-dark">
-                            Confirm
-                          </button>
-                        </form>
-                        <form action={updateBookingStatus.bind(null, booking.id, "cancelled")}>
-                          <button type="submit" className="rounded-full bg-clay px-4 py-1.5 text-xs font-semibold text-white transition hover:opacity-90">
-                            Cancel
-                          </button>
-                        </form>
-                      </>
-                    ) : null}
-
-                    {booking.status === "confirmed" ? (
-                      <>
-                        <form action={updateBookingStatus.bind(null, booking.id, "completed")}>
-                          <button type="submit" className="rounded-full bg-charcoal px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-sage-dark">
-                            Complete
-                          </button>
-                        </form>
-                        <form action={updateBookingStatus.bind(null, booking.id, "cancelled")}>
-                          <button type="submit" className="rounded-full bg-clay px-4 py-1.5 text-xs font-semibold text-white transition hover:opacity-90">
-                            Cancel
-                          </button>
-                        </form>
-                      </>
-                    ) : null}
+                    <Link
+                      href={`/admin/reservations?q=${encodeURIComponent(booking.guest_name)}`}
+                      className="rounded-full border border-sage/20 px-4 py-1.5 text-xs font-semibold text-muted transition hover:bg-sand hover:text-charcoal"
+                    >
+                      Manage status →
+                    </Link>
                   </div>
                 </div>
               ))}
