@@ -13,9 +13,10 @@ const PHONE_RE = /^[+()\d\s.-]{6,40}$/;
 
 const labelClass = "mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-muted";
 const fieldClass =
-  "w-full rounded-xl border border-sage/20 bg-sand/40 px-4 py-3 text-sm text-charcoal outline-none transition placeholder:text-muted/50 focus:border-sage focus:bg-white focus:ring-2 focus:ring-sage/15";
+  "w-full rounded-full border border-sage/20 bg-[#e5e7eb] px-5 py-3 text-sm text-charcoal outline-none transition placeholder:text-muted/60 focus:border-sage";
 const fieldAreaClass =
-  "w-full rounded-xl border border-sage/20 bg-sand/40 px-4 py-3 text-sm text-charcoal outline-none transition placeholder:text-muted/50 focus:border-sage focus:bg-white focus:ring-2 focus:ring-sage/15 resize-none";
+  "w-full rounded-2xl border border-sage/20 bg-[#e5e7eb] px-5 py-3 text-sm text-charcoal outline-none transition placeholder:text-muted/60 focus:border-sage resize-none";
+const errorClass = "mt-1.5 text-xs text-clay";
 
 function validate({ name, email, phone, notes }) {
   if (!name.trim()) return "Name is required.";
@@ -57,13 +58,31 @@ export default function NewClientModal({ onClose }) {
     const trimmedPhone = phone.trim();
     const trimmedNotes = notes.trim();
 
-    const validationError = validate({ name, email: trimmedEmail, phone: trimmedPhone, notes: trimmedNotes });
-    if (validationError) { setError(validationError); return; }
+    const validationError = validate({
+      name,
+      email: trimmedEmail,
+      phone: trimmedPhone,
+      notes: trimmedNotes,
+    });
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     setLoading(true);
     try {
-      const result = await createAdminClient({ name, email: trimmedEmail, phone: trimmedPhone, notes: trimmedNotes });
-      if (!result.ok) { setError(result.error || "Something went wrong."); return; }
+      const result = await createAdminClient({
+        name,
+        email: trimmedEmail,
+        phone: trimmedPhone,
+        notes: trimmedNotes,
+      });
+
+      if (!result.ok) {
+        setError(result.error || "Something went wrong.");
+        return;
+      }
+
       router.refresh();
       onClose();
     } catch {
@@ -77,87 +96,78 @@ export default function NewClientModal({ onClose }) {
     <div
       ref={overlayRef}
       onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/40 p-4 backdrop-blur-sm"
     >
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-charcoal/8">
-
-        {/* Coloured top bar */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-sage to-sage-dark" />
-
+      <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] bg-cream shadow-2xl">
         {/* Header */}
-        <div className="flex items-start justify-between px-7 pt-6 pb-5">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-sage-dark">
-              New client
-            </p>
-            <h2 className="mt-1 font-heading text-2xl text-charcoal">
-              Add contact
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="rounded-full p-1.5 text-muted transition hover:bg-sand hover:text-charcoal"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-4 w-4" aria-hidden="true">
-              <path d="M6 6l12 12M18 6 6 18" />
-            </svg>
-          </button>
+        <div className="border-b border-sage/15 px-8 py-6">
+          <p className="text-xs uppercase tracking-[0.28em] text-sage-dark">Admin</p>
+          <h2 className="mt-1 font-heading text-3xl text-charcoal">New Client</h2>
+          <p className="mt-1 text-sm text-muted">Add a contact record without a booking.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-7 pb-7">
-          <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="px-8 py-6">
+          <div className="space-y-5">
+            {/* Name */}
             <div>
               <label htmlFor="nc-name" className={labelClass}>
-                Full name <span className="text-clay normal-case font-normal">*</span>
+                Full name <span className="text-clay">*</span>
               </label>
               <input
                 id="nc-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ana Jovanović"
+                placeholder="E.g. Ana Jovanović"
                 maxLength={MAX_NAME}
                 className={fieldClass}
+                required
                 autoFocus
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="nc-email" className={labelClass}>Email</label>
-                <input
-                  id="nc-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ana@example.com"
-                  maxLength={MAX_EMAIL}
-                  className={fieldClass}
-                />
-              </div>
-              <div>
-                <label htmlFor="nc-phone" className={labelClass}>Phone</label>
-                <input
-                  id="nc-phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+381 60 123 456"
-                  maxLength={MAX_PHONE}
-                  className={fieldClass}
-                />
-              </div>
+            {/* Email */}
+            <div>
+              <label htmlFor="nc-email" className={labelClass}>
+                Email address
+              </label>
+              <input
+                id="nc-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="client@example.com"
+                maxLength={MAX_EMAIL}
+                className={fieldClass}
+              />
             </div>
 
+            {/* Phone */}
             <div>
-              <label htmlFor="nc-notes" className={labelClass}>Notes</label>
+              <label htmlFor="nc-phone" className={labelClass}>
+                Phone number
+              </label>
+              <input
+                id="nc-phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+381 60 123 4567"
+                maxLength={MAX_PHONE}
+                className={fieldClass}
+              />
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label htmlFor="nc-notes" className={labelClass}>
+                Notes
+              </label>
               <textarea
                 id="nc-notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Allergies, preferences, referral source…"
+                placeholder="Preferences, allergies, referral source…"
                 maxLength={MAX_NOTES}
                 rows={3}
                 className={fieldAreaClass}
@@ -165,26 +175,22 @@ export default function NewClientModal({ onClose }) {
             </div>
           </div>
 
-          {error && (
-            <p className="mt-4 rounded-xl bg-clay/8 px-4 py-3 text-xs text-clay ring-1 ring-clay/20">
-              {error}
-            </p>
-          )}
+          {error ? <p className={errorClass}>{error}</p> : null}
 
-          <div className="mt-6 flex items-center justify-end gap-2.5">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full px-5 py-2.5 text-sm font-medium text-muted transition hover:text-charcoal"
-            >
-              Cancel
-            </button>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
             <button
               type="submit"
               disabled={loading}
-              className="rounded-full bg-sage px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sage-dark disabled:opacity-60"
+              className="rounded-full bg-charcoal px-6 py-3 text-sm font-semibold text-white transition hover:bg-sage-dark disabled:opacity-60"
             >
               {loading ? "Saving…" : "Save client"}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-sage/20 px-6 py-3 text-sm font-semibold text-charcoal transition hover:bg-sand"
+            >
+              Cancel
             </button>
           </div>
         </form>
