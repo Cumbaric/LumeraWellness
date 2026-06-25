@@ -13,9 +13,9 @@ const PHONE_RE = /^[+()\d\s.-]{6,40}$/;
 
 const labelClass = "mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-muted";
 const fieldClass =
-  "w-full rounded-full border border-sage/20 bg-[#e5e7eb] px-5 py-3 text-sm text-charcoal outline-none transition placeholder:text-muted/60 focus:border-sage";
+  "w-full rounded-full border border-sage/20 bg-white px-5 py-3 text-sm text-charcoal outline-none transition placeholder:text-muted/60 focus:border-sage";
 const fieldAreaClass =
-  "w-full rounded-2xl border border-sage/20 bg-[#e5e7eb] px-5 py-3 text-sm text-charcoal outline-none transition placeholder:text-muted/60 focus:border-sage resize-none";
+  "w-full rounded-2xl border border-sage/20 bg-white px-5 py-3 text-sm text-charcoal outline-none transition placeholder:text-muted/60 focus:border-sage resize-none";
 const errorClass = "mt-1.5 text-xs text-clay";
 
 function validate({ name, email, phone, notes }) {
