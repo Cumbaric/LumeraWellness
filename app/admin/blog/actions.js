@@ -22,7 +22,7 @@ async function checkAdmin(supabase) {
   return !!isAdmin;
 }
 
-export async function createPost({ title, slug, excerpt, content, coverImageUrl, isPublished }) {
+export async function createPost({ title, slug, excerpt, content, coverImageUrl, isPublished, authorName }) {
   const supabase = await createClient();
   if (!(await checkAdmin(supabase))) return { ok: false, error: "Unauthorized." };
 
@@ -43,6 +43,7 @@ export async function createPost({ title, slug, excerpt, content, coverImageUrl,
       cover_image_url: coverImageUrl || null,
       is_published: !!isPublished,
       published_at: now,
+      author_name: authorName?.trim() || null,
     })
     .select("id")
     .single();
@@ -58,7 +59,7 @@ export async function createPost({ title, slug, excerpt, content, coverImageUrl,
   return { ok: true, id: data.id };
 }
 
-export async function updatePost({ id, title, slug, excerpt, content, coverImageUrl, isPublished }) {
+export async function updatePost({ id, title, slug, excerpt, content, coverImageUrl, isPublished, authorName }) {
   const supabase = await createClient();
   if (!(await checkAdmin(supabase))) return { ok: false, error: "Unauthorized." };
 
@@ -88,6 +89,7 @@ export async function updatePost({ id, title, slug, excerpt, content, coverImage
       is_published: !!isPublished,
       published_at: publishedAt,
       updated_at: new Date().toISOString(),
+      author_name: authorName?.trim() || null,
     })
     .eq("id", id);
 

@@ -57,62 +57,123 @@ export default async function AdminBlogPage() {
           </Link>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-[2rem] border border-sage/15 bg-white shadow-sm">
-          <table className="w-full border-collapse text-left text-sm">
-            <thead className="bg-sand/40 text-xs uppercase tracking-[0.18em] text-muted">
-              <tr>
-                <th className="px-6 py-4 font-medium">Title</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium">Published</th>
-                <th className="px-6 py-4 font-medium">Created</th>
-                <th className="px-6 py-4 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-sage/10">
-              {posts.map((post) => (
-                <tr key={post.id} className="align-middle hover:bg-sand/20 transition">
-                  <td className="px-6 py-4">
-                    <p className="font-medium text-charcoal">{post.title}</p>
-                    <p className="mt-0.5 text-xs text-muted">/blog/{post.slug}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    {post.is_published ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-sage/20 bg-sage/10 px-3 py-1 text-xs font-medium text-sage-dark">
-                        <span className="h-1.5 w-1.5 rounded-full bg-sage" />Published
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-charcoal/10 bg-sand px-3 py-1 text-xs font-medium text-muted">
-                        <span className="h-1.5 w-1.5 rounded-full bg-muted/40" />Draft
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-muted">{formatDate(post.published_at)}</td>
-                  <td className="px-6 py-4 text-muted">{formatDate(post.created_at)}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/admin/blog/${post.id}/edit`}
-                        className="rounded-full border border-sage/20 px-4 py-1.5 text-xs font-semibold text-charcoal transition hover:bg-sand"
-                      >
-                        Edit
-                      </Link>
-                      {post.is_published && (
-                        <Link
-                          href={`/blog/${post.slug}`}
-                          target="_blank"
-                          className="rounded-full border border-sage/20 px-4 py-1.5 text-xs font-semibold text-muted transition hover:bg-sand hover:text-charcoal"
-                        >
-                          View →
-                        </Link>
-                      )}
-                      <DeletePostButton id={post.id} title={post.title} />
-                    </div>
-                  </td>
+        <>
+          {/* Desktop table */}
+          <div className="hidden overflow-hidden rounded-[2rem] border border-sage/15 bg-white shadow-sm lg:block">
+            <table className="w-full border-collapse text-left text-sm">
+              <thead className="bg-sand/40 text-xs uppercase tracking-[0.18em] text-muted">
+                <tr>
+                  <th className="px-6 py-4 font-medium">Title</th>
+                  <th className="px-6 py-4 font-medium">Status</th>
+                  <th className="px-6 py-4 font-medium">Published</th>
+                  <th className="px-6 py-4 font-medium">Created</th>
+                  <th className="px-6 py-4 font-medium">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-sage/10">
+                {posts.map((post) => (
+                  <tr key={post.id} className="align-middle transition hover:bg-sand/20">
+                    <td className="px-6 py-4">
+                      <p className="font-medium text-charcoal">{post.title}</p>
+                      <p className="mt-0.5 text-xs text-muted">/blog/{post.slug}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      {post.is_published ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-sage/20 bg-sage/10 px-3 py-1 text-xs font-medium text-sage-dark">
+                          <span className="h-1.5 w-1.5 rounded-full bg-sage" />Published
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-charcoal/10 bg-sand px-3 py-1 text-xs font-medium text-muted">
+                          <span className="h-1.5 w-1.5 rounded-full bg-muted/40" />Draft
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-muted">{formatDate(post.published_at)}</td>
+                    <td className="px-6 py-4 text-muted">{formatDate(post.created_at)}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/admin/blog/${post.id}/edit`}
+                          className="rounded-full border border-sage/20 px-4 py-1.5 text-xs font-semibold text-charcoal transition hover:bg-sand"
+                        >
+                          Edit
+                        </Link>
+                        {post.is_published && (
+                          <Link
+                            href={`/blog/${post.slug}`}
+                            target="_blank"
+                            className="rounded-full border border-sage/20 px-4 py-1.5 text-xs font-semibold text-muted transition hover:bg-sand hover:text-charcoal"
+                          >
+                            View →
+                          </Link>
+                        )}
+                        <DeletePostButton id={post.id} title={post.title} />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="grid gap-4 lg:hidden">
+            {posts.map((post) => (
+              <div
+                key={post.id}
+                className="rounded-[2rem] border border-sage/15 bg-white p-5 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-heading text-lg font-semibold text-charcoal leading-snug">
+                      {post.title}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-muted">/blog/{post.slug}</p>
+                  </div>
+                  {post.is_published ? (
+                    <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full border border-sage/20 bg-sage/10 px-3 py-1 text-xs font-medium text-sage-dark">
+                      <span className="h-1.5 w-1.5 rounded-full bg-sage" />Published
+                    </span>
+                  ) : (
+                    <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full border border-charcoal/10 bg-sand px-3 py-1 text-xs font-medium text-muted">
+                      <span className="h-1.5 w-1.5 rounded-full bg-muted/40" />Draft
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-4 flex gap-6 text-xs text-muted">
+                  <div>
+                    <p className="uppercase tracking-[0.15em]">Published</p>
+                    <p className="mt-0.5 text-charcoal">{formatDate(post.published_at)}</p>
+                  </div>
+                  <div>
+                    <p className="uppercase tracking-[0.15em]">Created</p>
+                    <p className="mt-0.5 text-charcoal">{formatDate(post.created_at)}</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <Link
+                    href={`/admin/blog/${post.id}/edit`}
+                    className="rounded-full border border-sage/20 px-4 py-2 text-xs font-semibold text-charcoal transition hover:bg-sand"
+                  >
+                    Edit
+                  </Link>
+                  {post.is_published && (
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      target="_blank"
+                      className="rounded-full border border-sage/20 px-4 py-2 text-xs font-semibold text-muted transition hover:bg-sand hover:text-charcoal"
+                    >
+                      View →
+                    </Link>
+                  )}
+                  <DeletePostButton id={post.id} title={post.title} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </AdminShell>
   );

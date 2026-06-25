@@ -31,6 +31,7 @@ export default function PostForm({ post }) {
   const [slugTouched, setSlugTouched] = useState(isEditing);
   const [excerpt, setExcerpt] = useState(post?.excerpt || "");
   const [content, setContent] = useState(post?.content || "");
+  const [authorName, setAuthorName] = useState(post?.author_name || "");
   const [coverImageUrl, setCoverImageUrl] = useState(post?.cover_image_url || "");
   const [coverUploading, setCoverUploading] = useState(false);
 
@@ -65,7 +66,7 @@ export default function PostForm({ post }) {
     if (!title.trim()) { setError("Title is required."); return; }
     setSaving(true);
 
-    const payload = { title, slug, excerpt, content, coverImageUrl, isPublished };
+    const payload = { title, slug, excerpt, content, coverImageUrl, isPublished, authorName };
     const result = isEditing
       ? await updatePost({ id: post.id, ...payload }).catch(() => null)
       : await createPost(payload).catch(() => null);
@@ -160,6 +161,19 @@ export default function PostForm({ post }) {
             {coverUploading ? "Uploading…" : "Upload cover image"}
           </button>
           <input ref={coverFileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleCoverUpload} />
+        </div>
+
+        {/* Author */}
+        <div className="rounded-2xl border border-sage/15 bg-white p-5 shadow-sm">
+          <label className={labelClass}>Author name</label>
+          <input
+            type="text"
+            value={authorName}
+            onChange={(e) => setAuthorName(e.target.value)}
+            placeholder="E.g. Ana Jovanović"
+            maxLength={120}
+            className={fieldClass}
+          />
         </div>
 
         {/* Actions */}

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { formatPrice, getStartingPrice } from "@/lib/format";
+import { formatPrice, getStartingPrice, getDurationRange } from "@/lib/format";
 
 /**
  * Presentational card for a single service. Reused on the Home page and,
@@ -8,6 +8,7 @@ import { formatPrice, getStartingPrice } from "@/lib/format";
  */
 export default function ServiceCard({ service }) {
   const startingPrice = getStartingPrice(service);
+  const durationRange = getDurationRange(service);
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-cream text-center shadow-sm ring-1 ring-sand transition-all duration-300 hover:shadow-md">
@@ -29,19 +30,33 @@ export default function ServiceCard({ service }) {
           {service.shortDescription}
         </p>
 
-        <div className="mt-5 flex flex-col items-center gap-2">
-          <span className="text-sm text-charcoal">
-            from{" "}
-            <span className="font-medium text-sage-dark">
-              {formatPrice(startingPrice)}
+        <div className="mt-5 flex flex-col items-center gap-3">
+          <div className="flex items-center gap-3 text-sm text-charcoal">
+            {durationRange && (
+              <span className="text-muted">{durationRange}</span>
+            )}
+            {durationRange && <span className="text-sand">·</span>}
+            <span>
+              from{" "}
+              <span className="font-medium text-sage-dark">
+                {formatPrice(startingPrice)}
+              </span>
             </span>
-          </span>
-          <Link
-            href={`/services/${service.slug}`}
-            className="text-sm font-medium text-sage transition-colors hover:text-sage-dark"
-          >
-            Learn more →
-          </Link>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              href={`/booking?service=${service.slug}`}
+              className="rounded-full bg-sage px-5 py-2 text-sm font-medium text-cream transition hover:bg-sage-dark"
+            >
+              Book now
+            </Link>
+            <Link
+              href={`/services/${service.slug}`}
+              className="rounded-full border border-sage/20 px-5 py-2 text-sm font-medium text-charcoal transition hover:bg-sand"
+            >
+              Learn more
+            </Link>
+          </div>
         </div>
       </div>
     </article>
