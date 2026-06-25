@@ -3,6 +3,7 @@ import WelcomeIntro from "@/components/home/WelcomeIntro";
 import FeaturedServices from "@/components/home/FeaturedServices";
 import GiftVoucher from "@/components/home/GiftVoucher";
 import WhyLumera from "@/components/home/WhyLumera";
+import LocationHours from "@/components/home/LocationHours";
 import FeaturedReview from "@/components/home/FeaturedReview";
 import BookingCTA from "@/components/home/BookingCTA";
 import { getFeaturedServices } from "@/lib/services";
@@ -36,6 +37,7 @@ export default async function Home() {
       <FeaturedServices services={featuredServices} />
       <GiftVoucher />
       <WhyLumera />
+      <LocationHours />
       <FeaturedReview />
       <BookingCTA />
     </>

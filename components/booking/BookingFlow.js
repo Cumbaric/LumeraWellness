@@ -95,12 +95,16 @@ const MAX_EMAIL_LENGTH = 254;
 const MAX_PHONE_LENGTH = 40;
 const MAX_NOTES_LENGTH = 1000;
 
+const VALID_PROMOS = { WELCOME10: "€10 off your first treatment" };
+
 export default function BookingFlow({ services, initialDetails = emptyDetails }) {
   const searchParams = useSearchParams();
   const presetSlug = searchParams.get("service");
   const validPreset = services.some((s) => s.slug === presetSlug)
     ? presetSlug
     : "";
+  const promoCode = (searchParams.get("promo") || "").toUpperCase().trim();
+  const promoLabel = VALID_PROMOS[promoCode] ?? null;
   const startingDetails = { ...emptyDetails, ...initialDetails };
 
   const [step, setStep] = useState(1);
@@ -249,6 +253,10 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
     setSubmitError(null);
 
     try {
+      const notesWithPromo = promoLabel
+        ? [details.notes.trim(), `Promo: ${promoCode}`].filter(Boolean).join("\n")
+        : details.notes;
+
       const result = await createBooking({
         serviceId: selectedService.id,
         serviceDurationId: selectedDuration.id,
@@ -257,7 +265,7 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
         name: details.name,
         email: details.email,
         phone: details.phone,
-        notes: details.notes,
+        notes: notesWithPromo,
       });
 
       if (result.ok) {
@@ -507,6 +515,25 @@ export default function BookingFlow({ services, initialDetails = emptyDetails })
             <h2 className="font-heading text-2xl font-semibold text-charcoal">
               Your details
             </h2>
+
+            {promoLabel ? (
+              <div className="mt-4 flex items-center gap-3 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="h-5 w-5 shrink-0 text-gold" aria-hidden="true">
+                  <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6" />
+                  <path d="M2 7h20v5H2z" />
+                  <path d="M12 22V7" />
+                  <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+                  <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+                </svg>
+                <div>
+                  <p className="text-sm font-semibold text-charcoal">
+                    Voucher <span className="font-mono tracking-wide">{promoCode}</span> applied
+                  </p>
+                  <p className="text-xs text-muted">{promoLabel} — discount applied at the studio</p>
+                </div>
+              </div>
+            ) : null}
+
             <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
                 <label

@@ -2,7 +2,7 @@ import Link from "next/link";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
-import { Reveal } from "@/components/ui/Reveal";
+import { Reveal, RevealItem } from "@/components/ui/Reveal";
 
 export default function GiftVoucher() {
   return (
@@ -10,10 +10,11 @@ export default function GiftVoucher() {
       <Container>
         <Reveal>
           <SectionHeading label="New Client Gift" title="A little welcome gift" />
-          <div className="overflow-hidden rounded-2xl border-2 border-gold bg-cream shadow-md">
-          <div className="grid grid-cols-1 gap-10 p-8 sm:p-12 lg:grid-cols-2 lg:items-center">
+        </Reveal>
+        <div className="overflow-hidden rounded-2xl border-2 border-gold bg-cream shadow-md">
+          <Reveal stagger className="grid grid-cols-1 gap-10 p-8 sm:p-12 lg:grid-cols-2 lg:items-center">
             {/* Left: offer copy */}
-            <div>
+            <RevealItem>
               <h3 className="font-heading text-3xl font-semibold text-charcoal sm:text-4xl">
                 €10 off your first treatment
               </h3>
@@ -22,15 +23,15 @@ export default function GiftVoucher() {
                 visit to Lumera.
               </p>
               <Link
-                href="/contact"
+                href="/booking?promo=WELCOME10"
                 className="mt-8 inline-block rounded-full bg-sage px-8 py-3 text-base font-medium text-cream transition-colors hover:bg-sage-dark"
               >
                 Claim your gift
               </Link>
-            </div>
+            </RevealItem>
 
             {/* Right: decorative voucher visual */}
-            <div className="flex justify-center lg:justify-end">
+            <RevealItem className="flex justify-center lg:justify-end">
               <div className="flex w-full max-w-sm flex-col items-center rounded-2xl border-2 border-dashed border-gold/70 bg-sand/60 px-8 py-10 text-center">
                 <span className="font-heading text-2xl font-semibold tracking-wide text-charcoal">
                   Lumera Gift
@@ -42,10 +43,9 @@ export default function GiftVoucher() {
                   WELCOME10
                 </span>
               </div>
-            </div>
-          </div>
+            </RevealItem>
+          </Reveal>
         </div>
-        </Reveal>
       </Container>
     </Section>
   );
