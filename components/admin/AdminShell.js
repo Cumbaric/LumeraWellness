@@ -6,6 +6,7 @@ const navItems = [
   { label: "Reservations", href: "/admin/reservations", key: "reservations" },
   { label: "Calendar", href: "/admin/calendar", key: "calendar" },
   { label: "Clients", href: "/admin/clients", key: "clients" },
+  { label: "Blog", href: "/admin/blog", key: "blog" },
 ];
 
 function getNavClass(isActive) {

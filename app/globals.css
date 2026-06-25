@@ -29,6 +29,106 @@
   animation: page-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* ── Blog post content prose styles ─────────────────────────────────────── */
+.blog-content {
+  color: #2d2d2d;
+  line-height: 1.8;
+  font-size: 1rem;
+}
+
+.blog-content h2 {
+  font-family: var(--font-heading, serif);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.blog-content h3 {
+  font-family: var(--font-heading, serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.blog-content p {
+  margin-top: 1.25rem;
+}
+
+.blog-content p:first-child {
+  margin-top: 0;
+}
+
+.blog-content ul,
+.blog-content ol {
+  margin-top: 1.25rem;
+  padding-left: 1.5rem;
+}
+
+.blog-content ul {
+  list-style-type: disc;
+}
+
+.blog-content ol {
+  list-style-type: decimal;
+}
+
+.blog-content li {
+  margin-top: 0.4rem;
+}
+
+.blog-content blockquote {
+  border-left: 3px solid #c0a062;
+  padding-left: 1.25rem;
+  margin: 1.5rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.blog-content a {
+  color: #5a7a5a;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.blog-content a:hover {
+  color: #3d5c3d;
+}
+
+.blog-content strong {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.blog-content em {
+  font-style: italic;
+}
+
+.blog-content img {
+  width: 100%;
+  border-radius: 1rem;
+  margin: 2rem 0;
+  object-fit: cover;
+}
+
+.blog-content hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 2rem 0;
+}
+
+/* TipTap placeholder */
+.tiptap p.is-editor-empty:first-child::before {
+  color: #9ca3af;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
 @layer components {
   /* ── Animated gold underline (left-to-right) ─────────────────────────────
      Add .link-underline to any link that should show a 2 px gold bar
