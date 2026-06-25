@@ -302,3 +302,102 @@ export async function createAdminClient({ name, email, phone, notes }) {
   revalidatePath("/admin/clients");
   return { ok: true };
 }
+
+export async function updateAdminClient({ id, name, email, phone, notes }) {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "You must be signed in." };
+
+  const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin");
+  if (adminError || !isAdmin) return { ok: false, error: "You are not authorized." };
+
+  const trimmedName = name?.trim() || "";
+  const trimmedEmail = email?.trim().toLowerCase() || "";
+  const trimmedPhone = phone?.trim() || "";
+  const trimmedNotes = notes?.trim() || "";
+
+  if (!trimmedName) return { ok: false, error: "Name is required." };
+  if (trimmedName.length > MAX_NAME_LENGTH) return { ok: false, error: "Name is too long." };
+  if (trimmedEmail && trimmedEmail.length > MAX_EMAIL_LENGTH) return { ok: false, error: "Email is too long." };
+  if (trimmedPhone && trimmedPhone.length > MAX_PHONE_LENGTH) return { ok: false, error: "Phone number is too long." };
+  if (trimmedNotes.length > MAX_NOTES_LENGTH) return { ok: false, error: "Notes are too long." };
+
+  if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+    return { ok: false, error: "Please enter a valid email address." };
+  }
+
+  if (trimmedPhone && !/^[+()\d\s.-]{6,40}$/.test(trimmedPhone)) {
+    return { ok: false, error: "Please enter a valid phone number." };
+  }
+
+  const { error: updateError } = await supabase
+    .from("clients")
+    .update({
+      guest_name: trimmedName,
+      guest_email: trimmedEmail || null,
+      guest_phone: trimmedPhone || null,
+      notes: trimmedNotes || null,
+    })
+    .eq("id", id);
+
+  if (updateError) {
+    console.error("[updateAdminClient] error:", updateError.message);
+    return { ok: false, error: "Something went wrong saving the client." };
+  }
+
+  revalidatePath("/admin/clients");
+  return { ok: true };
+}
+
+export async function deleteAdminClient(id) {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "You must be signed in." };
+
+  const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin");
+  if (adminError || !isAdmin) return { ok: false, error: "You are not authorized." };
+
+  const { error } = await supabase.from("clients").delete().eq("id", id);
+
+  if (error) {
+    console.error("[deleteAdminClient] error:", error.message);
+    return { ok: false, error: "Failed to delete client." };
+  }
+
+  revalidatePath("/admin/clients");
+  return { ok: true };
+}
+
+export async function saveClientFromBooking({ name, email, phone, notes }) {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "You must be signed in." };
+
+  const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin");
+  if (adminError || !isAdmin) return { ok: false, error: "You are not authorized." };
+
+  const trimmedEmail = email?.trim().toLowerCase() || "";
+  const trimmedPhone = phone?.trim() || "";
+
+  const { data, error } = await supabase
+    .from("clients")
+    .insert({
+      guest_name: name?.trim() || "",
+      guest_email: trimmedEmail || null,
+      guest_phone: trimmedPhone || null,
+      notes: notes?.trim() || null,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("[saveClientFromBooking] error:", error.message);
+    return { ok: false, error: "Failed to save client record." };
+  }
+
+  revalidatePath("/admin/clients");
+  return { ok: true, id: data.id };
+}

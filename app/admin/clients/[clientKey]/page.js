@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AdminShell from "@/components/admin/AdminShell";
+import ClientActions from "@/components/admin/ClientActions";
 
 export const metadata = {
   title: "Client Details | Lumera Wellness Admin",
@@ -205,13 +206,23 @@ export default async function AdminClientDetailsPage({ params }) {
                 </p>
               </div>
 
-              {latestBooking ? (
-                <StatusBadge status={latestBooking.status} />
-              ) : (
-                <span className="inline-flex rounded-full border border-sage/15 bg-sand px-4 py-1.5 text-xs font-medium text-muted">
-                  contact only
-                </span>
-              )}
+              <div className="flex flex-wrap items-center gap-3">
+                {latestBooking ? (
+                  <StatusBadge status={latestBooking.status} />
+                ) : (
+                  <span className="inline-flex rounded-full border border-sage/15 bg-sand px-4 py-1.5 text-xs font-medium text-muted">
+                    contact only
+                  </span>
+                )}
+                <ClientActions
+                  manualRecord={manualRecord}
+                  bookingClient={{
+                    name: latestBooking?.guest_name || "",
+                    email: latestBooking?.guest_email || "",
+                    phone: latestBooking?.guest_phone || "",
+                  }}
+                />
+              </div>
             </div>
 
             <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -276,12 +287,12 @@ export default async function AdminClientDetailsPage({ params }) {
                     </p>
                   </div>
 
-                  {isManualOnly && manualRecord.notes ? (
+                  {manualRecord?.notes ? (
                     <div>
                       <p className="text-xs uppercase tracking-[0.18em] text-muted">
                         Notes
                       </p>
-                      <p className="mt-1 text-muted">{manualRecord.notes}</p>
+                      <p className="mt-1 whitespace-pre-wrap text-muted">{manualRecord.notes}</p>
                     </div>
                   ) : null}
 
