@@ -98,54 +98,71 @@ export default async function AdminClientDetailsPage({ params }) {
     redirect("/admin/login");
   }
 
-  const { data: bookings, error: bookingsError } = await supabase
-    .from("bookings")
-    .select(
+  const [bookingsResult, manualQuery] = await Promise.all([
+    supabase
+      .from("bookings")
+      .select(
+        `
+        id,
+        booking_date,
+        booking_time,
+        guest_name,
+        guest_email,
+        guest_phone,
+        notes,
+        status,
+        created_at,
+        services (
+          name
+        ),
+        service_durations (
+          minutes,
+          price
+        )
       `
-      id,
-      booking_date,
-      booking_time,
-      guest_name,
-      guest_email,
-      guest_phone,
-      notes,
-      status,
-      created_at,
-      services (
-        name
-      ),
-      service_durations (
-        minutes,
-        price
       )
-    `
-    )
-    .order("booking_date", { ascending: false })
-    .order("booking_time", { ascending: false });
+      .order("booking_date", { ascending: false })
+      .order("booking_time", { ascending: false }),
+    // Look up manual-only client — by UUID if key is "manual-{uuid}", else by email/phone
+    clientKey.startsWith("manual-")
+      ? supabase
+          .from("clients")
+          .select("id, guest_name, guest_email, guest_phone, notes, created_at")
+          .eq("id", clientKey.replace(/^manual-/, ""))
+          .maybeSingle()
+      : supabase
+          .from("clients")
+          .select("id, guest_name, guest_email, guest_phone, notes, created_at")
+          .or(
+            `guest_email.eq.${normalizedClientKey},guest_phone.eq.${normalizedClientKey}`
+          )
+          .maybeSingle(),
+  ]);
 
-  const clientBookings = (bookings || [])
+  const bookingsError = bookingsResult.error;
+  const clientBookings = (bookingsResult.data || [])
     .filter((booking) => getClientKeyFromBooking(booking) === normalizedClientKey)
     .sort((a, b) =>
       getBookingDateTimeValue(b).localeCompare(getBookingDateTimeValue(a))
     );
 
-  if (!bookingsError && clientBookings.length === 0) {
+  const manualRecord = manualQuery.data ?? null;
+  const isManualOnly = clientBookings.length === 0 && manualRecord;
+
+  if (!bookingsError && clientBookings.length === 0 && !manualRecord) {
     notFound();
   }
 
-  const latestBooking = clientBookings[0];
-  const firstBooking = clientBookings[clientBookings.length - 1];
+  const latestBooking = clientBookings[0] ?? null;
+  const firstBooking = clientBookings[clientBookings.length - 1] ?? null;
 
   const totalValue = clientBookings.reduce((total, booking) => {
-    if (booking.status === "cancelled") {
-      return total;
-    }
-
+    if (booking.status === "cancelled") return total;
     return total + Number(booking.service_durations?.price || 0);
   }, 0);
 
   const completedBookings = clientBookings.filter(
-    (booking) => booking.status === "completed"
+    (b) => b.status === "completed"
   ).length;
 
   return (
@@ -169,7 +186,7 @@ export default async function AdminClientDetailsPage({ params }) {
           </div>
         ) : null}
 
-        {!bookingsError && latestBooking ? (
+        {!bookingsError && (latestBooking || isManualOnly) ? (
           <>
             <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
               <div>
@@ -177,15 +194,24 @@ export default async function AdminClientDetailsPage({ params }) {
                   Client profile
                 </p>
                 <h1 className="font-heading text-5xl text-charcoal">
-                  {latestBooking.guest_name || "Unknown client"}
+                  {isManualOnly
+                    ? manualRecord.guest_name || "Unknown client"
+                    : latestBooking.guest_name || "Unknown client"}
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-                  Booking history, client contact data, latest appointment and
-                  total reservation value.
+                  {isManualOnly
+                    ? "Manual contact record — no bookings on file yet."
+                    : "Booking history, client contact data, latest appointment and total reservation value."}
                 </p>
               </div>
 
-              <StatusBadge status={latestBooking.status} />
+              {latestBooking ? (
+                <StatusBadge status={latestBooking.status} />
+              ) : (
+                <span className="inline-flex rounded-full border border-sage/15 bg-sand px-4 py-1.5 text-xs font-medium text-muted">
+                  contact only
+                </span>
+              )}
             </div>
 
             <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -193,25 +219,31 @@ export default async function AdminClientDetailsPage({ params }) {
                 label="Bookings"
                 value={clientBookings.length}
                 helper={
-                  clientBookings.length > 1
+                  isManualOnly
+                    ? "Manual contact"
+                    : clientBookings.length > 1
                     ? "Returning client"
                     : "New client"
                 }
               />
               <SummaryCard
                 label="Total value"
-                value={formatMoney(totalValue)}
+                value={isManualOnly ? "—" : formatMoney(totalValue)}
                 helper="Cancelled bookings excluded"
               />
               <SummaryCard
                 label="Completed"
-                value={completedBookings}
+                value={isManualOnly ? "—" : completedBookings}
                 helper="Completed appointments"
               />
               <SummaryCard
-                label="First seen"
-                value={formatDate(firstBooking?.created_at)}
-                helper="First booking record"
+                label="Added"
+                value={formatDate(
+                  isManualOnly
+                    ? manualRecord.created_at
+                    : firstBooking?.created_at
+                )}
+                helper={isManualOnly ? "Manual record created" : "First booking record"}
               />
             </div>
 
@@ -227,7 +259,9 @@ export default async function AdminClientDetailsPage({ params }) {
                       Email
                     </p>
                     <p className="mt-1 text-charcoal">
-                      {latestBooking.guest_email || "-"}
+                      {isManualOnly
+                        ? manualRecord.guest_email || "-"
+                        : latestBooking?.guest_email || "-"}
                     </p>
                   </div>
 
@@ -236,9 +270,20 @@ export default async function AdminClientDetailsPage({ params }) {
                       Phone
                     </p>
                     <p className="mt-1 text-charcoal">
-                      {latestBooking.guest_phone || "-"}
+                      {isManualOnly
+                        ? manualRecord.guest_phone || "-"
+                        : latestBooking?.guest_phone || "-"}
                     </p>
                   </div>
+
+                  {isManualOnly && manualRecord.notes ? (
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Notes
+                      </p>
+                      <p className="mt-1 text-muted">{manualRecord.notes}</p>
+                    </div>
+                  ) : null}
 
                   <div>
                     <p className="text-xs uppercase tracking-[0.18em] text-muted">
@@ -249,62 +294,72 @@ export default async function AdminClientDetailsPage({ params }) {
                 </div>
               </div>
 
-              <div className="rounded-[2rem] border border-sage/15 bg-white p-6 shadow-sm">
-                <p className="text-xs uppercase tracking-[0.22em] text-muted">
-                  Latest reservation
-                </p>
+              {latestBooking ? (
+                <div className="rounded-[2rem] border border-sage/15 bg-white p-6 shadow-sm">
+                  <p className="text-xs uppercase tracking-[0.22em] text-muted">
+                    Latest reservation
+                  </p>
 
-                <div className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                      Treatment
-                    </p>
-                    <p className="mt-1 font-medium text-charcoal">
-                      {latestBooking.services?.name || "Unknown service"}
-                    </p>
-                  </div>
+                  <div className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Treatment
+                      </p>
+                      <p className="mt-1 font-medium text-charcoal">
+                        {latestBooking.services?.name || "Unknown service"}
+                      </p>
+                    </div>
 
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                      Date and time
-                    </p>
-                    <p className="mt-1 font-medium text-charcoal">
-                      {latestBooking.booking_date} ·{" "}
-                      {String(latestBooking.booking_time).slice(0, 5)}
-                    </p>
-                  </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Date and time
+                      </p>
+                      <p className="mt-1 font-medium text-charcoal">
+                        {latestBooking.booking_date} ·{" "}
+                        {String(latestBooking.booking_time).slice(0, 5)}
+                      </p>
+                    </div>
 
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                      Duration and price
-                    </p>
-                    <p className="mt-1 text-charcoal">
-                      {latestBooking.service_durations?.minutes || "-"} min ·{" "}
-                      {formatMoney(latestBooking.service_durations?.price)}
-                    </p>
-                  </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Duration and price
+                      </p>
+                      <p className="mt-1 text-charcoal">
+                        {latestBooking.service_durations?.minutes || "-"} min ·{" "}
+                        {formatMoney(latestBooking.service_durations?.price)}
+                      </p>
+                    </div>
 
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                      Status
-                    </p>
-                    <div className="mt-1">
-                      <StatusBadge status={latestBooking.status} />
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Status
+                      </p>
+                      <div className="mt-1">
+                        <StatusBadge status={latestBooking.status} />
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                        Notes
+                      </p>
+                      <p className="mt-1 text-muted">
+                        {latestBooking.notes || "—"}
+                      </p>
                     </div>
                   </div>
-
-                  <div className="sm:col-span-2">
-                    <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                      Notes
-                    </p>
-                    <p className="mt-1 text-muted">
-                      {latestBooking.notes || "—"}
-                    </p>
-                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center rounded-[2rem] border border-sage/15 bg-white p-6 shadow-sm">
+                  <p className="text-sm text-muted">
+                    No bookings on file. This is a manual contact record only.
+                  </p>
+                </div>
+              )}
             </div>
 
+            {!isManualOnly ? (
+            <>
             <div className="hidden overflow-hidden rounded-[2rem] border border-sage/15 bg-white shadow-sm lg:block">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1050px] border-collapse text-left text-sm">
@@ -408,6 +463,8 @@ export default async function AdminClientDetailsPage({ params }) {
                 </article>
               ))}
             </div>
+            </>
+            ) : null}
           </>
         ) : null}
     </AdminShell>

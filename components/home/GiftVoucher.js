@@ -11,7 +11,7 @@ export default function GiftVoucher() {
         <Reveal>
           <SectionHeading label="New Client Gift" title="A little welcome gift" />
         </Reveal>
-        <div className="overflow-hidden rounded-2xl border-2 border-gold bg-cream shadow-md">
+        <div className="rounded-2xl border-2 border-gold bg-cream shadow-md">
           <Reveal stagger className="grid grid-cols-1 gap-10 p-8 sm:p-12 lg:grid-cols-2 lg:items-center">
             {/* Left: offer copy */}
             <RevealItem>

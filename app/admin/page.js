@@ -388,12 +388,6 @@ export default async function AdminDashboardPage() {
       activePage="dashboard"
       title="Dashboard"
       userEmail={user.email}
-      headerAction={
-        <NewBookingButton
-          services={services}
-          className="w-fit rounded-full border border-sage/20 bg-white px-5 py-3 text-sm font-semibold text-charcoal shadow-sm transition hover:bg-sand"
-        />
-      }
     >
         <div className="mb-10 grid gap-6 lg:grid-cols-[1.4fr_0.8fr] lg:items-end">
           <div>

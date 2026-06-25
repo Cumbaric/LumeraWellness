@@ -288,27 +288,24 @@ export default function Header() {
                     <div className="my-1 border-t border-charcoal/10" />
 
                     {isAdmin ? (
-                      <>
-                        <Link
-                          href="/admin"
-                          role="menuitem"
-                          onClick={() => setIsAccountMenuOpen(false)}
-                          className="block rounded-lg px-3 py-2 text-sm font-medium text-charcoal transition-colors hover:bg-sand"
-                        >
-                          Admin Panel
-                        </Link>
-                        <div className="my-1 border-t border-charcoal/10" />
-                      </>
-                    ) : null}
-
-                    <Link
-                      href="/account/bookings"
-                      role="menuitem"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      className="block rounded-lg px-3 py-2 text-sm font-medium text-charcoal transition-colors hover:bg-sand"
-                    >
-                      My Bookings
-                    </Link>
+                      <Link
+                        href="/admin"
+                        role="menuitem"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                        className="block rounded-lg px-3 py-2 text-sm font-medium text-charcoal transition-colors hover:bg-sand"
+                      >
+                        Admin Panel
+                      </Link>
+                    ) : (
+                      <Link
+                        href="/account/bookings"
+                        role="menuitem"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                        className="block rounded-lg px-3 py-2 text-sm font-medium text-charcoal transition-colors hover:bg-sand"
+                      >
+                        My Bookings
+                      </Link>
+                    )}
 
                     <div className="my-1 border-t border-charcoal/10" />
 
@@ -409,15 +406,15 @@ export default function Header() {
                   >
                     Admin Panel
                   </Link>
-                ) : null}
-
-                <Link
-                  href="/account/bookings"
-                  onClick={close}
-                  className="text-xl font-medium text-cream transition-colors hover:text-gold"
-                >
-                  My Bookings
-                </Link>
+                ) : (
+                  <Link
+                    href="/account/bookings"
+                    onClick={close}
+                    className="text-xl font-medium text-cream transition-colors hover:text-gold"
+                  >
+                    My Bookings
+                  </Link>
+                )}
 
                 <button
                   type="button"

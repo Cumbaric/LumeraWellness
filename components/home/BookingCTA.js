@@ -13,16 +13,16 @@ export default function BookingCTA() {
               Ready to unwind?
             </h2>
           </RevealItem>
-          <RevealItem>
-            <p className="mt-4 max-w-xl text-cream/80">
+          <RevealItem className="mt-4">
+            <p className="max-w-xl text-cream/80">
               Reserve your moment of calm. Our therapists are ready to help you
               relax, recover, and rebalance.
             </p>
           </RevealItem>
-          <RevealItem>
+          <RevealItem className="mt-10">
             <Link
               href="/booking"
-              className="mt-10 rounded-full bg-cream px-8 py-3 text-base font-medium text-sage-dark transition-colors hover:bg-sand"
+              className="rounded-full bg-cream px-8 py-3 text-base font-medium text-sage-dark transition-colors hover:bg-sand"
             >
               Book Your Visit
             </Link>

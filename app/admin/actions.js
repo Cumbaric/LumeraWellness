@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 export async function signOutAdmin() {
@@ -252,5 +253,52 @@ export async function createAdminBooking({
     };
   }
 
+  return { ok: true };
+}
+
+export async function createAdminClient({ name, email, phone, notes }) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { ok: false, error: "You must be signed in." };
+
+  const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin");
+  if (adminError || !isAdmin) return { ok: false, error: "You are not authorized." };
+
+  const trimmedName = name?.trim() || "";
+  const trimmedEmail = email?.trim().toLowerCase() || "";
+  const trimmedPhone = phone?.trim() || "";
+  const trimmedNotes = notes?.trim() || "";
+
+  if (!trimmedName) return { ok: false, error: "Name is required." };
+  if (trimmedName.length > MAX_NAME_LENGTH) return { ok: false, error: "Name is too long." };
+  if (trimmedEmail && trimmedEmail.length > MAX_EMAIL_LENGTH) return { ok: false, error: "Email is too long." };
+  if (trimmedPhone && trimmedPhone.length > MAX_PHONE_LENGTH) return { ok: false, error: "Phone number is too long." };
+  if (trimmedNotes.length > MAX_NOTES_LENGTH) return { ok: false, error: "Notes are too long." };
+
+  if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+    return { ok: false, error: "Please enter a valid email address." };
+  }
+
+  if (trimmedPhone && !/^[+()\d\s.-]{6,40}$/.test(trimmedPhone)) {
+    return { ok: false, error: "Please enter a valid phone number." };
+  }
+
+  const { error: insertError } = await supabase.from("clients").insert({
+    guest_name: trimmedName,
+    guest_email: trimmedEmail || null,
+    guest_phone: trimmedPhone || null,
+    notes: trimmedNotes || null,
+  });
+
+  if (insertError) {
+    console.error("[createAdminClient] insert error:", insertError.message);
+    return { ok: false, error: "Something went wrong saving the client. Please try again." };
+  }
+
+  revalidatePath("/admin/clients");
   return { ok: true };
 }

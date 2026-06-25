@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AdminShell from "@/components/admin/AdminShell";
+import NewClientButton from "@/components/admin/NewClientButton";
 
 export const metadata = {
   title: "Clients | Lumera Wellness Admin",
@@ -113,11 +114,40 @@ function buildClientsFromBookings(bookings) {
     }
   });
 
-  return Array.from(clientsMap.values()).sort((a, b) =>
-    getBookingDateTimeValue(b.latestBooking).localeCompare(
-      getBookingDateTimeValue(a.latestBooking),
-    ),
-  );
+  return clientsMap;
+}
+
+function mergeManualClients(clientsMap, manualClients) {
+  for (const mc of manualClients) {
+    const emailKey = String(mc.guest_email || "").trim().toLowerCase();
+    const phoneKey = String(mc.guest_phone || "").trim();
+    const key = emailKey || phoneKey || `manual-${mc.id}`;
+
+    if (!clientsMap.has(key)) {
+      clientsMap.set(key, {
+        key,
+        name: mc.guest_name || "Unknown client",
+        email: mc.guest_email || "-",
+        phone: mc.guest_phone || "-",
+        bookings: [],
+        bookingCount: 0,
+        totalValue: 0,
+        latestBooking: null,
+        manualRecord: mc,
+        createdAt: mc.created_at,
+      });
+    }
+  }
+
+  return Array.from(clientsMap.values()).sort((a, b) => {
+    const aVal = a.latestBooking
+      ? getBookingDateTimeValue(a.latestBooking)
+      : a.createdAt || "";
+    const bVal = b.latestBooking
+      ? getBookingDateTimeValue(b.latestBooking)
+      : b.createdAt || "";
+    return bVal.localeCompare(aVal);
+  });
 }
 
 export default async function AdminClientsPage({ searchParams }) {
@@ -141,49 +171,55 @@ export default async function AdminClientsPage({ searchParams }) {
     redirect("/admin/login");
   }
 
-  const { data: bookings, error: bookingsError } = await supabase
-    .from("bookings")
-    .select(
-      `
-      id,
-      booking_date,
-      booking_time,
-      guest_name,
-      guest_email,
-      guest_phone,
-      notes,
-      status,
-      created_at,
-      services (
-        name
-      ),
-      service_durations (
-        minutes,
-        price
+  const [bookingsResult, manualClientsResult] = await Promise.all([
+    supabase
+      .from("bookings")
+      .select(
+        `
+        id,
+        booking_date,
+        booking_time,
+        guest_name,
+        guest_email,
+        guest_phone,
+        notes,
+        status,
+        created_at,
+        services (
+          name
+        ),
+        service_durations (
+          minutes,
+          price
+        )
+      `,
       )
-    `,
-    )
-    .order("booking_date", { ascending: false })
-    .order("booking_time", { ascending: false });
+      .order("booking_date", { ascending: false })
+      .order("booking_time", { ascending: false }),
+    supabase
+      .from("clients")
+      .select("id, guest_name, guest_email, guest_phone, notes, created_at")
+      .order("created_at", { ascending: false }),
+  ]);
 
-  const allBookings = bookings || [];
-  const clients = buildClientsFromBookings(allBookings);
+  const bookingsError = bookingsResult.error;
+  const allBookings = bookingsResult.data || [];
+  const manualClients = manualClientsResult.data || [];
+  const clientsMap = buildClientsFromBookings(allBookings);
+  const clients = mergeManualClients(clientsMap, manualClients);
 
   const filteredClients = clients.filter((client) => {
-    if (!normalizedSearchQuery) {
-      return true;
-    }
-
+    if (!normalizedSearchQuery) return true;
     return [client.name, client.email, client.phone]
-      .map((value) => String(value || "").toLowerCase())
-      .some((value) => value.includes(normalizedSearchQuery));
+      .map((v) => String(v || "").toLowerCase())
+      .some((v) => v.includes(normalizedSearchQuery));
   });
 
   const summary = {
     totalClients: clients.length,
-    returningClients: clients.filter((client) => client.bookingCount > 1)
-      .length,
-    newClients: clients.filter((client) => client.bookingCount === 1).length,
+    returningClients: clients.filter((c) => c.bookingCount > 1).length,
+    newClients: clients.filter((c) => c.bookingCount === 1).length,
+    manualOnly: clients.filter((c) => c.bookingCount === 0).length,
     totalBookings: allBookings.length,
   };
 
@@ -201,8 +237,11 @@ export default async function AdminClientsPage({ searchParams }) {
             </p>
           </div>
 
-          <div className="rounded-full bg-white px-5 py-3 text-sm text-muted shadow-sm">
-            {filteredClients.length} shown / {clients.length} total
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-white px-5 py-3 text-sm text-muted shadow-sm">
+              {filteredClients.length} shown / {clients.length} total
+            </div>
+            <NewClientButton />
           </div>
         </div>
 
@@ -231,9 +270,9 @@ export default async function AdminClientsPage({ searchParams }) {
                 helper="Clients with one booking"
               />
               <SummaryCard
-                label="Total bookings"
-                value={summary.totalBookings}
-                helper="All reservation records"
+                label="Manual contacts"
+                value={summary.manualOnly}
+                helper="Added without a booking"
               />
             </div>
 
@@ -308,7 +347,11 @@ export default async function AdminClientsPage({ searchParams }) {
           <div className="grid gap-4">
             {filteredClients.map((client) => {
               const latestBooking = client.latestBooking;
+              const isManualOnly = client.bookingCount === 0;
               const clientHref = `/admin/clients/${encodeURIComponent(client.key)}`;
+              const firstSeen = isManualOnly
+                ? client.createdAt
+                : client.bookings[client.bookings.length - 1]?.created_at;
 
               return (
                 <Link
@@ -328,11 +371,7 @@ export default async function AdminClientsPage({ searchParams }) {
                         {client.name}
                       </h2>
                       <p className="mt-1 text-xs text-muted">
-                        First seen:{" "}
-                        {formatDate(
-                          client.bookings[client.bookings.length - 1]
-                            ?.created_at,
-                        )}
+                        First seen: {formatDate(firstSeen)}
                       </p>
                     </div>
 
@@ -354,7 +393,9 @@ export default async function AdminClientsPage({ searchParams }) {
                         {client.bookingCount}
                       </p>
                       <p className="mt-1 text-xs text-muted">
-                        {client.bookingCount > 1
+                        {isManualOnly
+                          ? "Manual contact"
+                          : client.bookingCount > 1
                           ? "Returning client"
                           : "New client"}
                       </p>
@@ -364,13 +405,19 @@ export default async function AdminClientsPage({ searchParams }) {
                       <p className="text-xs uppercase tracking-[0.18em] text-muted">
                         Latest reservation
                       </p>
-                      <p className="mt-2 text-sm font-semibold text-charcoal">
-                        {latestBooking.booking_date} ·{" "}
-                        {String(latestBooking.booking_time).slice(0, 5)}
-                      </p>
-                      <p className="mt-1 text-xs text-muted">
-                        {latestBooking.services?.name || "Unknown service"}
-                      </p>
+                      {latestBooking ? (
+                        <>
+                          <p className="mt-2 text-sm font-semibold text-charcoal">
+                            {latestBooking.booking_date} ·{" "}
+                            {String(latestBooking.booking_time).slice(0, 5)}
+                          </p>
+                          <p className="mt-1 text-xs text-muted">
+                            {latestBooking.services?.name || "Unknown service"}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="mt-2 text-sm text-muted">—</p>
+                      )}
                     </div>
 
                     <div>
@@ -378,7 +425,13 @@ export default async function AdminClientsPage({ searchParams }) {
                         Status
                       </p>
                       <div className="mt-2">
-                        <StatusBadge status={latestBooking.status} />
+                        {latestBooking ? (
+                          <StatusBadge status={latestBooking.status} />
+                        ) : (
+                          <span className="inline-flex rounded-full border border-sage/15 bg-sand px-2.5 py-0.5 text-xs font-medium text-muted">
+                            contact
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -387,7 +440,7 @@ export default async function AdminClientsPage({ searchParams }) {
                         Value
                       </p>
                       <p className="mt-2 text-sm font-semibold text-charcoal">
-                        {formatMoney(client.totalValue)}
+                        {isManualOnly ? "—" : formatMoney(client.totalValue)}
                       </p>
                     </div>
 
@@ -396,7 +449,9 @@ export default async function AdminClientsPage({ searchParams }) {
                         Notes
                       </p>
                       <p className="mt-2 line-clamp-2 text-sm text-muted">
-                        {latestBooking.notes || "—"}
+                        {isManualOnly
+                          ? client.manualRecord?.notes || "—"
+                          : latestBooking?.notes || "—"}
                       </p>
                       <p className="mt-3 translate-x-[-6px] text-xs font-semibold text-sage-dark opacity-0 transition-all duration-300 ease-out group-hover:translate-x-0 group-hover:opacity-100">
                         Open client profile →
