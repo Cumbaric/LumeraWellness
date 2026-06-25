@@ -48,8 +48,9 @@ export async function createPost({ title, slug, excerpt, content, coverImageUrl,
     .single();
 
   if (error) {
+    console.error("[createPost] error:", error.code, error.message, error.details, error.hint);
     if (error.code === "23505") return { ok: false, error: "A post with this slug already exists." };
-    return { ok: false, error: "Failed to create post." };
+    return { ok: false, error: `Failed to create post: ${error.message}` };
   }
 
   revalidatePath("/blog");

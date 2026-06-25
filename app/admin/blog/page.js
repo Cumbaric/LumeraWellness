@@ -2,8 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAllPostsAdmin } from "@/lib/posts";
-import { deletePost } from "./actions";
 import AdminShell from "@/components/admin/AdminShell";
+import DeletePostButton from "@/components/admin/DeletePostButton";
 
 export const metadata = {
   title: "Blog | Lumera Wellness Admin",
@@ -105,17 +105,7 @@ export default async function AdminBlogPage() {
                           View →
                         </Link>
                       )}
-                      <form action={deletePost.bind(null, post.id)}>
-                        <button
-                          type="submit"
-                          className="rounded-full px-4 py-1.5 text-xs font-semibold text-clay transition hover:bg-clay/10"
-                          onClick={(e) => {
-                            if (!confirm(`Delete "${post.title}"?`)) e.preventDefault();
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </form>
+                      <DeletePostButton id={post.id} title={post.title} />
                     </div>
                   </td>
                 </tr>
